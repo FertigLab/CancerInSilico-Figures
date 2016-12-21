@@ -1,0 +1,91 @@
+---
+title: "Parameter Sensitivity Figures"
+date: "`r doc_date()`"
+package: "`r pkg_ver('CancerInSilico')`"
+vignette: >
+  %\VignetteIndexEntry{Parameter Sensitivity Figures}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+output: 
+  BiocStyle::html_document
+---
+
+```{r include=FALSE, cache=FALSE}
+library(CancerInSilico)
+```
+## Density Sensitivity
+
+```{r}
+## load all simulations
+load('../Data/densitySensitivity.RData')
+
+## total number of simulations
+numRuns <- 8
+
+## run time of each simulation
+time <- models[[1]]@params[['runTime']]
+
+## total number of cells over time
+total <- matrix(nrow = numRuns, ncol = time + 1)
+
+## density of cells over time
+density <- matrix(nrow = numRuns, ncol = time + 1)
+
+## density when simulation hits capacity
+densityAtCapacity <- c()
+
+## iterate through each simulation
+for (i in 1:numRuns) {
+  
+  total[i,] <- sapply(0:time, getNumberOfCells, model=models[[i]])
+  density[i,] <- sapply(0:time, getDensity, model=models[[i]])
+  if (i > 1) {densityAtCapacity[i-1] <- density[i,abs(total[i,] - total[1,]) > 10][1]}
+  
+}
+
+## plot density at which cells hit capacity for each simulation
+plot(seq(0.2, 0.5, 0.05), densityAtCapacity)
+
+## plot total number of cells over time
+plot(total[1,], type = 'l')
+
+for (i in 2:numRuns) {
+  lines(total[i,], col = 'red')
+  ## highlight after cells hit density at capacity
+  lines(total[i,density[i,]<densityAtCapacity[i-1]], type = 'l')
+}
+```
+
+## Cycle Length Sensitivity
+
+```{r}
+## load all simulations
+load('../Data/cycleLengthSensitivity.RData')
+
+## total number of simulations
+numRuns <- 12
+
+## run time of each simulation
+time <- models[[1]]@params[['runTime']]
+
+## total number of cells over time
+total <- matrix(nrow = 12, ncol = time + 1)
+
+## time cells hit capacity
+timeAtCapacity <- c()
+
+for (i in 1:12) {
+  
+  total[i,] <- sapply(0:time, getNumberOfCells, model=models[[i]])
+  if (i > 1) {timeAtCapacity[i-1] <- min(which(total[i,] > 300))}
+}
+
+## plot time at capacity
+plot(seq(8, 48, 4), timeAtCapacity)
+
+plot(total[1,], type = 'l')
+
+for (i in 2:12) {
+  lines(total[i,])
+}
+
