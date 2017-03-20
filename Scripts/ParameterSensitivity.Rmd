@@ -38,14 +38,18 @@ densityAtCapacity <- c()
 timeAtCapacity <- c()
 
 ## iterate through each simulation
-for (i in 1:numRuns) {
-  
+for (i in 1:numRuns)
+{
+  ## get total cells and density over time
   total[i,] <- sapply(0:time, getNumberOfCells, model=models[[i]])
   density[i,] <- sapply(0:time, getDensity, model=models[[i]])
-  if (i > 1) {
-    densityAtCapacity[i-1] <- density[i,abs(total[i,] - total[1,]) > 10][1]}
-    timeAtCapacity[i-1] <- min(which(abs(total[i,] - total[1,]) > 10))
   
+  ## capacity is hit once it deviates from first run
+  if (i > 1)
+  {  
+    densityAtCapacity[i-1] <- density[i,abs(total[i,] - total[1,]) > 10][1]
+    timeAtCapacity[i-1] <- min(which(abs(total[i,] - total[1,]) > 10))
+  }  
 }
 
 ## plot density at which cells hit capacity for each simulation
@@ -56,17 +60,17 @@ plot(seq(0.2, 0.5, 0.05), timeAtCapacity, type = 'l')
 
 ## plot total number of cells over time
 plot(total[1,], type = 'l')
-
-for (i in 2:numRuns) {
+for (i in 2:numRuns)
+{
+  ## highlight after cells hit capacity
   lines(total[i,], col = 'red')
-  ## highlight after cells hit density at capacity
   lines(total[i,density[i,]<densityAtCapacity[i-1]], type = 'l')
 }
 
 ## plot density over time
 plot(density[1,], type = 'l')
-
-for (i in 2:numRuns) {
+for (i in 2:numRuns)
+{
   lines(density[i,])
 }
 ```
@@ -88,9 +92,8 @@ total <- matrix(nrow = 12, ncol = time + 1)
 
 ## time cells hit capacity
 timeAtCapacity <- c()
-
-for (i in 1:12) {
-  
+for (i in 1:12)
+{  
   total[i,] <- sapply(0:time, getNumberOfCells, model=models[[i]])
   if (i > 1) {timeAtCapacity[i-1] <- min(which(total[i,] > 300))}
 }
@@ -100,8 +103,53 @@ plot(seq(8, 48, 4), timeAtCapacity, type = 'l')
 
 ## plot total number of cells over time 
 plot(total[1,], type = 'l')
-
-for (i in 2:12) {
+for (i in 2:12)
+{
   lines(total[i,])
 }
+```
 
+## Cycle Synchronization
+
+```{r}
+## load both simulations
+load('../Data/syncCycles.RData')
+
+## run time of each simulation
+time <- synced@params[['runTime']]
+
+## total number of cells over time
+syncedTotal <- sapply(0:time, getNumberOfCells, model=synced)
+unsyncedTotal <- sapply(0:time, getNumberOfCells, model=not_synced)
+
+## plot difference in total
+plot(0:time, unsyncedTotal, type = 'l')
+lines(0:time, syncedTotal, col = 'red')
+
+```
+
+## Inherit Growth
+
+```{r}
+## load data
+load('../Data/inheritGrowth.RData')
+
+## run time of each simulation
+time <- inherited@params[['runTime']]
+
+## total number of cells over time
+inheritedTotal <- sapply(0:time, getNumberOfCells, model=inherited)
+randomTotal <- sapply(0:time, getNumberOfCells, model=random)
+
+## plot difference in total
+plot(0:time, randomTotal, type = 'l')
+lines(0:time, inheritedTotal, col = 'red')
+
+## plot distribution shift  
+plot(density(getCycleLengths(inherited, 0)))
+lines(density(getCycleLengths(inherited, 168)), col = 'red')
+
+## difference in means
+mean(getCycleLengths(inherited, 0))
+mean(getCycleLengths(inherited, 168))
+```
