@@ -1,0 +1,25 @@
+#!/bin/bash
+
+if [ "$1" != "" ]; then
+    FILE=$1
+else
+    echo missing file name
+    exit 1
+fi
+
+if [ "$2" != "" ]; then
+    TOTAL_RUNS=$2
+else
+    TOTAL_RUNS=1
+fi
+
+if [ "$3" != "" ]; then
+   JOB_NAME=$3
+else
+   JOB_NAME=`date +%Y%m%d_%H%M%S`
+fi
+
+DIR=~/CancerInSilico/Output/$JOB_NAME/
+
+mkdir -p $DIR
+sbatch -D $DIR --array=1-$TOTAL_RUNS ~/CancerInSilico/runCancerInSilico.sh $FILE $JOB_NAME
