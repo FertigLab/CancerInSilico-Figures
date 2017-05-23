@@ -3,7 +3,7 @@ library(methods)
 
 args <- commandArgs(TRUE)
 arrayNum <- as.integer(args[1])
-jobName <- args[2]
+returnSize <- as.integer(args[2])
 
 #### Set Defaults ####
 
@@ -41,42 +41,40 @@ density <- allDensities[index[1]]
 boundary <- allBoundaries[index[2]]
 cellTypes <- c(allCellTypes[index[3]])
 
-#allCellTypes <- lapply(seq(12,48,4), function(l) new('CellType',
-#    name='B', minCycle=l, cycleLength=function() l))
-
-#ctA <- new('CellType', name='A', cycleLength=function() 24, minCycle=24)
-#ctB <- allCellTypes[arrayNum]
-#cellTypes <- c(ctA, ctB)
-#cellTypeInitFreq <- c(0.55, 0.45)
-
-#### Run Simulation ####
-
-repeat
+if (!missing(returnSize))
 {
-    output <- runCellSimulation(initialNum=initialNum,
-        runTime=runTime,
-        density=density,
-        boundary=boundary,
-        syncCycles=syncCycles,
-        randSeed=randSeed,
-        modelType=modelType,
-        outputIncrement=outputIncrement,
-        recordIncrement=recordIncrement,
-        timeIncrement=timeIncrement,
-        cellTypes=cellTypes,
-        cellTypeInitFreq=cellTypeInitFreq,
-        drugs=drugs,
-        maxDeformation=maxDeformation,
-        maxTranslation=maxTranslation,
-        maxRotation=maxRotation,
-        nG=nG,
-        epsilon=epsilon,
-        delta=delta
-    )
-    randSeed <- randSeed + 100
-
-    if (length(output@cells) > output@runTime / output@recordIncrement)
-        break
+    cat(as.numeric(prod(dim)))
 }
+else
+{
+    #### Run Simulation ####
+    repeat
+    {
+        output <- runCellSimulation(initialNum=initialNum,
+            runTime=runTime,
+            density=density,
+            boundary=boundary,
+            syncCycles=syncCycles,
+            randSeed=randSeed,
+            modelType=modelType,
+            outputIncrement=outputIncrement,
+            recordIncrement=recordIncrement,
+            timeIncrement=timeIncrement,
+            cellTypes=cellTypes,
+            cellTypeInitFreq=cellTypeInitFreq,
+            drugs=drugs,
+            maxDeformation=maxDeformation,
+            maxTranslation=maxTranslation,
+            maxRotation=maxRotation,
+            nG=nG,
+            epsilon=epsilon,
+            delta=delta
+        )
+        randSeed <- randSeed + 100
 
-save(output, file=paste("output_", jobName, "_", arrayNum, ".RData", sep=""))
+        if (length(output@cells) > output@runTime / output@recordIncrement)
+            break
+    }
+
+    save(output, file=paste("output_", arrayNum, ".RData", sep=""))
+}

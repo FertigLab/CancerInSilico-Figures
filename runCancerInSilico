@@ -1,25 +1,16 @@
 #!/bin/bash
 
-if [ "$1" != "" ]; then
-    FILE=$1
+if [ "$1" != ""]; then
+    DIR=$1
 else
-    echo missing file name
+    echo "no output directory"
     exit 1
 fi
 
-if [ "$2" != "" ]; then
-    TOTAL_RUNS=$2
-else
-    TOTAL_RUNS=1
-fi
+THIS_SCRIPT=$PWD/`basename "$0"`
 
-if [ "$3" != "" ]; then
-   JOB_NAME=$3
-else
-   JOB_NAME=`date +%Y%m%d_%H%M%S`
-fi
+SIZE=$(Rscript $THIS_SCRIPT.R 0 0)
+echo $SIZE
 
-DIR=~/CancerInSilico/Output/$JOB_NAME/
-
-mkdir -p $DIR
-sbatch -D $DIR --array=1-$TOTAL_RUNS ~/CancerInSilico/runCancerInSilico.sh $FILE $JOB_NAME
+#mkdir -p $DIR
+#sbatch -D $DIR --array=1-$SIZE $THIS_SCRIPT.sh $THIS_SCRIPT.R

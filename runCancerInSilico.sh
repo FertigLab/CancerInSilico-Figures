@@ -17,17 +17,10 @@ else
     exit 1
 fi
 
-if [ "$2" != "" ]; then
-    JOB_NAME=$2
-else
-    echo missing argument
-    exit 1
-fi
-
 if [ "$SLURM_ARRAY_TASK_ID" != "" ]; then
     ARRAY_NUM=$SLURM_ARRAY_TASK_ID
 else
     ARRAY_NUM=1
 fi
 
-time Rscript $FILE $ARRAY_NUM $JOB_NAME
+time Rscript $FILE $ARRAY_NUM
