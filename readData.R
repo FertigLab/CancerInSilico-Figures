@@ -1,11 +1,11 @@
 library('CancerInSilico')
 library(methods)
 
-
 readFilesAsList <- function(path_to_files) {
 
     # get all file names
-    allFiles <- list.files(path=path_to_files, full.names = TRUE, recursive = TRUE)
+    allFiles <- list.files(path=path_to_files, full.names = TRUE,
+        recursive = TRUE, pattern = "*.RData")
 
     # initalize empty list
     CellModelObj_list <- vector("list", length = length(allFiles))
