@@ -7,7 +7,7 @@ else
     exit 1
 fi
 
-THIS_SCRIPT=$(dirname "$0")/`basename "$0"`
+THIS_SCRIPT=$(readlink -f "$0")
 SIZE=$(Rscript $THIS_SCRIPT.R 1 0)
 
 echo "shell script called: $THIS_SCRIPT.sh"

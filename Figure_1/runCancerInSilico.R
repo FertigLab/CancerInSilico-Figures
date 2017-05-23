@@ -43,7 +43,7 @@ cellTypes <- c(allCellTypes[index[3]])
 
 #### Run Simulation ####
 
-if (!missing(returnSize)) {
+if (!is.na(returnSize)) {
 
     cat(as.numeric(prod(dim)))
 
