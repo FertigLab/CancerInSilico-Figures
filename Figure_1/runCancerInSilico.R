@@ -41,13 +41,14 @@ density <- allDensities[index[1]]
 boundary <- allBoundaries[index[2]]
 cellTypes <- c(allCellTypes[index[3]])
 
-if (!missing(returnSize))
-{
+#### Run Simulation ####
+
+if (!missing(returnSize)) {
+
     cat(as.numeric(prod(dim)))
-}
-else
-{
-    #### Run Simulation ####
+
+} else {
+
     repeat
     {
         output <- runCellSimulation(initialNum=initialNum,
