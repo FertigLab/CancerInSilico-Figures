@@ -1,7 +1,7 @@
 library(CancerInSilico)
 
 ## read data, extract neccesary info
-allFiles <- list.files(path='../Data/Figure_2', full.names = TRUE,
+allFiles <- list.files(path='../Data/Figure_3', full.names = TRUE,
     recursive = TRUE, pattern = "*.RData")
 
 fileNo <- 1
@@ -11,20 +11,17 @@ for (file in allFiles)
 {
     load(file)
     nCells <- sapply(0:output@runTime, getNumberOfCells, model=output)
-    contact <- sapply(0:output@runTime, function(t)
-        mean(getContactInhibition(output, t)))
-    den <- sapply(0:output@runTime, getDensity, model=output)
 
-    fig2Data[[file]] <- list('boundary'=output@boundary,
-        'initDensity'=output@density, 'numCells'=nCells,
-        'cycleLength'=output@cellTypes[[1]]@minCycle,
-        'contactInhibition'=contact, 'density'=den)
+    fig2Data[[file]] <- list('initDensity'=output@density,
+        'numCells'=nCells, 'synced'=output@syncCycles,
+        'drugEffect'=output@drugs[[1]]@cycleLengthEffect(0,1),
+        'cycleLength'=output@cellTypes[[1]]@minCycle)
 
     fileNo <- fileNo + 1
     setTxtProgressBar(pb, fileNo)
 }
 close(pb)
 print('saving...')
-save(fig2Data, file='Figure_2_cleaned.RData')
+save(fig2Data, file='Figure_3_cleaned.RData')
 
 
