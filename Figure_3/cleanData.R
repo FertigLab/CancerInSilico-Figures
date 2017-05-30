@@ -6,13 +6,13 @@ allFiles <- list.files(path='../Data/Figure_3', full.names = TRUE,
 
 fileNo <- 1
 pb <- txtProgressBar(min=1, max=length(allFiles), style=3)
-fig2Data <- list()
+fig3Data <- list()
 for (file in allFiles)
 {
     load(file)
     nCells <- sapply(0:output@runTime, getNumberOfCells, model=output)
 
-    fig2Data[[file]] <- list('initDensity'=output@density,
+    fig3Data[[file]] <- list('initDensity'=output@density,
         'numCells'=nCells, 'synced'=output@syncCycles,
         'drugEffect'=output@drugs[[1]]@cycleLengthEffect(0,1),
         'cycleLength'=output@cellTypes[[1]]@minCycle)

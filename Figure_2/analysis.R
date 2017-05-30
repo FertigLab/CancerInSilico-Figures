@@ -25,7 +25,7 @@ invisible(dev.off())
 
 ## Figure 2b - Contact Inhibition vs Density
 
-rawData <- sapply(fig2Data, function(mod)
+rawData <- lapply(fig2Data, function(mod)
     {
         if (mod$initDensity == 0.05)
             cbind(mod$density, 1/mod$contactInhibition,
@@ -47,19 +47,17 @@ ggsave(filename='fig2b.png', plot=fig)
 
 ## Figure 2c - Density over time, w/ and w/out boundary
 
-png(filename='fig2c.png')
+rawData <- lapply(fig2Data, function(mod)
+    {
+        if (mod$cycleLength == 24)
+            cbind(1:length(mod$density)-1, mod$density,
+            rep(ifelse(mod$boundary > 0, T, F), length(mod$density)),
+            rep(mod$initDensity, length(mod$density)))
+    })
+rawData <- rawData[!sapply(rawData, is.null)]
+rawData <- do.call(rbind, rawData)
+df <- data.frame(time=rawData[,1], den=rawData[,2], bd=rawData[,3]>0,
+    iDen=rawData[,4])
 
-iCL <- which(unname(sapply(fig2Data, function(l) l$cycleLength))==24)
-iBound <- which(unname(sapply(fig2Data, function(l) l$boundary))>0)
-iNoBound <- which(unname(sapply(fig2Data, function(l) l$boundary))==0)
-noBound <- intersect(iCL, iNoBound)
-bound <- intersect(iCL, iBound)
-
-xMax <- length(fig2Data[[1]]$numCells)
-plot.new()
-plot.window(xlim=c(0,xMax), ylim=c(0,1))
-invisible(sapply(noBound, function(i) lines(fig2Data[[i]]$density)))
-invisible(sapply(bound, function(i) lines(fig2Data[[i]]$density)))
-invisible(dev.off())
-
-
+fig <- ggplot(df, aes(x=time, y=den, col=bd)) + geom_point()
+ggsave(filename='fig2c.png', plot=fig)
