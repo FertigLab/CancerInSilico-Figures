@@ -43,22 +43,26 @@ makeHeatMap <- function(final_proportion_data) {
 
 	for (data in final_proportion_data) {
 
-		xind <- which(num_rows == data[1])
-		yind <- which(num_cols == data[2])
+		xind <- which(ordered_init_prop_typeA == data[1])
+		yind <- which(ordered_cycle_length_typeB == data[2])
 
 		final_proportion_mat[xind, yind] <- data[3]
 	}
+	
+	return(final_proportion_mat)
 
 	# make a heatmap using final_proportion_mat
-	mat.melted <- melt(final_proportion_mat) 
-	ggplot(mat.melted, aes(x = Var1, y = Var2, fill = value)) + geom_tile()
+	# mat.melted <- melt(final_proportion_mat) 
+	# image(final_proportion_mat, xlab = 'Matrix rows', ylab = 'Matrix columns')
 
 }
 
 load("Figure_5_cleaned.RData")
-makeHeatMap(final_proportion_data)
+fpm <- makeHeatMap(final_proportion_data)
+image(fpm, xlab = 'Inital Type A proportion', ylab = 'Cycle Length Type B', axes = F)
 
 # rownames(final_proportion_data) <- sapply(strsplit(rdsFiles[,1],split="_"),function(x){paste(x[4],x[5])})
 # colnames(final_proportion_data) <- sapply(strsplit(rdsFiles[1,],split="_"),function(x){paste(x[6],x[7])})
 # Heatmap(final_proportion_data[paste('Adist',seq(from=0,to=100,by=10)),paste('grAtoB ',seq(from=0,to=200,by=25),'.rds', sep="")],cluster_columns = F,cluster_rows = F)
 # Heatmap(matrix=final_proportion_data)
+
