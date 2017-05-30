@@ -1,5 +1,7 @@
 library('CancerInSilico')
-library('ComplexHeatmap')
+library('ggplot2')
+library('RColorBrewer')  
+library('reshape2') 
 library(methods)
 
 getFinalProportionData <- function(list_of_cell_models, num_rows) {
@@ -48,8 +50,13 @@ makeHeatMap <- function(final_proportion_data) {
 	}
 
 	# make a heatmap using final_proportion_mat
+	mat.melted <- melt(final_proportion_mat) 
+	ggplot(mat.melted, aes(x = Var1, y = Var2, fill = value)) + geom_tile()
 
 }
+
+load("Figure_5_cleaned.RData")
+makeHeatMap(final_proportion_data)
 
 # rownames(final_proportion_data) <- sapply(strsplit(rdsFiles[,1],split="_"),function(x){paste(x[4],x[5])})
 # colnames(final_proportion_data) <- sapply(strsplit(rdsFiles[1,],split="_"),function(x){paste(x[6],x[7])})
