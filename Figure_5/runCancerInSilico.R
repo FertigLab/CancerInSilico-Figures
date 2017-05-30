@@ -28,10 +28,23 @@ delta <- 0.2
 
 #### Set Custom Values ####
 
+allInitFreq_typeA <- seq(0,1,0.05)
+allCellTypes_typeB <- lapply(seq(12,36,4), function(l) new('CellType', name='B', minCycle=l, cycleLength=function() l))
+
+dim <- c(length(allInitFreq_typeA), length(allCellTypes_typeB))
+indexArray <- array(1:prod(dim), dim)
+index <- which(indexArray==arrayNum, arr.ind=TRUE)
+
+initFreq_typeA <- allInitFreq_typeA[index[1]]
+ctB <- allCellTypes_typeB[index[2]]
+ctA <- new('CellType', name='A', cycleLength=function() {return(36)}, minCycle=36)
+
+cellTypes <- c(ctA, ctB)
+cellTypeInitFreq <- c(initFreq_typeA, 1 - initFreq_typeA)
 
 #### Run Simulation ####
 
-if (!missing(returnSize)) {
+if (!is.na(returnSize)) {
 
     cat(as.numeric(prod(dim)))
 

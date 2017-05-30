@@ -1,7 +1,7 @@
 library(ggplot2)
 library(methods)
 library(CancerInSilico)
-load('Figure_2_cleaned.RData') #fig2Data
+load('Figure_3_cleaned.RData') #fig2Data
 
 ## Figure 2a - Growth curves, w/ and w/out boundary
 
