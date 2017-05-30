@@ -18,8 +18,8 @@ for (file in allFiles)
     finalCellType_list <- getCellTypes(output, finalTime)
 
     celltype_counts <- c(0,0)
-    celltype_counts[1] <- sum(finalCellType_list == 1)
-    celltype_counts[2] <- sum(finalCellType_list == 2)
+    celltype_counts[1] <- sum(finalCellType_list == 0)
+    celltype_counts[2] <- sum(finalCellType_list == 1)
     finalProportions <- celltype_counts[1]/sum(celltype_counts)
 
     final_proportion_data[[file]] <- c(init_proportion_typeA, cycle_length_typeB, finalProportions)
