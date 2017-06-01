@@ -57,7 +57,7 @@ makeHeatMap <- function(final_proportion_data) {
 
 }
 
-load("Figure_5_cleaned.RData")
+load("Figure_5b_cleaned.RData")
 fpm <- makeHeatMap(final_proportion_data)
 image(fpm, xlab = 'Inital Type A proportion', ylab = 'Cycle Length Type B', axes = F)
 
