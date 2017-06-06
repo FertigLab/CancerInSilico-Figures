@@ -14,30 +14,44 @@ l2norm <- function(a,b)
 
 ### fit no drug data
 
+noDrugSims <- fig3Data[sapply(fig3Data, function(d) d$drugEffect==1)]
 noDrugData <- subset(tangData, dosage==0 & day>1)$numCells
-noDrugData <- noDrugData * 80 / noDrugData[1]
-noDrugSim <- fig3Data[sapply(fig3Data, function(d) !d$synced & d$drugEffect==1)]
 
-t <- seq(1,121,24)
-l2 <- sapply(noDrugSim, function(sim) l2norm(sim$numCells[t], noDrugData))
-noDrugFit <- noDrugSim[[which(l2==min(l2))]]
+### fit drug data
 
-validSim <- fig3Data[sapply(fig3Data, function(d) !d$synced &
+timePoints <- seq(25,145,24)
+l2 <- sapply(noDrugSims, function(sim)
+    {
+        d <- noDrugData * sim$numCells[timePoints[1]] / noDrugData[1]
+        l2norm(sim$numCells[timePoints], d)
+    })
+
+noDrugFit <- noDrugSims[[which(l2==min(l2))]]
+noDrugFit$numCells <- noDrugFit$numCells * noDrugData[1] / noDrugFit$numCells[25]
+
+drugSims <- fig3Data[sapply(fig3Data, function(d)
     d$initDensity==noDrugFit$initDensity & d$cycleLength==noDrugFit$cycleLength)]
 
 doses <- c(0.01, 0.1, 1, 10, 100)
-fit <- lapply(doses, function(d)
+drugFits <- lapply(doses, function(d)
     {
-        noDrugData <- subset(tangData, dosage==d & day>1)$numCells
-        noDrugData <- noDrugData * 80 / noDrugData[1]
-        l2 <- sapply(validSim, function(sim) l2norm(sim$numCells[t], noDrugData))
-        return(validSim[[which(l2==min(l2))]])
+        drugData <- subset(tangData, dosage==d & day>1)$numCells
+        l2 <- sapply(drugSims, function(sim)
+            {
+                d <- drugData * sim$numCells[timePoints[1]] / drugData[1]
+                l2norm(sim$numCells[timePoints], d)
+            })
+        fit <- drugSims[[which(l2==min(l2))]]
+        fit$numCells <- fit$numCells * drugData[1] / fit$numCells[25]
+        return(fit)
     })
 
-plotData <- data.frame(day=seq(2,7), real1=noDrugData, fit1=noDrugFit$numCells[t],
-    real2=subset(tangData, dosage==10 & day>1)$numCells, fit2=fit[[1]]$numCells[t])
-fig <- ggplot(plotData, aes(x=day)) + geom_point(aes(y=real1)) + geom_line(aes(y=fit1)) +
-    geom_point(aes(y=real2, color='red')) + geom_line(aes(y=fit2))
+plotData <- data.frame(day=seq(2,7), real1=noDrugData, fit1=noDrugFit$numCells[timePoints],
+    real2=subset(tangData, dosage==10 & day>1)$numCells, fit2=drugFits[[4]]$numCells[timePoints])
+
+fig <- ggplot(plotData, aes(x=day)) + geom_point(aes(y=real1)) + geom_line(aes(y=fit1)) + 
+    geom_point(aes(y=real2, color='10ug')) + geom_line(aes(y=fit2, color='10ug'))
+
 ggsave(filename='fig3a.png', plot=fig)
 
 #fig <- ggplot(tangData, aes(x=day, y=numCells, col=log(dosage), group=dosage)) + geom_line()
