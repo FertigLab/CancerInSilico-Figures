@@ -12,16 +12,17 @@ for (file in allFiles)
     load(file)
     nCells <- sapply(0:output@runTime, getNumberOfCells, model=output)
 
-    fig3Data[[file]] <- list('initDensity'=output@density,
-        'numCells'=nCells, 'synced'=output@syncCycles,
-        'drugEffect'=output@drugs[[1]]@cycleLengthEffect(0,1),
-        'cycleLength'=output@cellTypes[[1]]@minCycle)
+    fig3Data[[file]] <- list(
+        'initDensity' = output@density,
+        'numCells'    = nCells,
+        'drugEffect'  = output@drugs[[1]]@cycleLengthEffect(0,1),
+        'cycleLength' = output@cellTypes[[1]]@minCycle)
 
     fileNo <- fileNo + 1
     setTxtProgressBar(pb, fileNo)
 }
 close(pb)
 print('saving...')
-save(fig2Data, file='Figure_3_cleaned.RData')
+save(fig3Data, file='Figure_3_cleaned.RData')
 
 
