@@ -14,7 +14,7 @@ boundary <- 1
 syncCycles <- FALSE
 randSeed <- 0
 outputIncrement <- 4
-recordIncrement <- 0.25
+recordIncrement <- 1
 timeIncrement <- 0.001
 cellTypes <- c(new('CellType', name='DEFAULT', minCycle=40, cycleLength=function() 40))
 cellTypeInitFreq <- c(1)
@@ -28,7 +28,7 @@ delta <- 0.2
 
 #### Set Custom Values ####
 
-allDrugs <- lapply(seq(1.0, 2.0, 0.05), function(l) new('Drug',
+allDrugs <- lapply(seq(1.0, 2.0, 0.5), function(l) new('Drug',
     name='DEFAULT', timeAdded=24, cycleLengthEffect=function(a,b) b*l))
 
 dim <- c(length(allDrugs))
