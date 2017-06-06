@@ -16,7 +16,7 @@ randSeed <- 0
 outputIncrement <- 4
 recordIncrement <- 1
 timeIncrement <- 0.001
-cellTypes <- c(new('CellType', name='DEFAULT', minCycle=40, cycleLength=function() 40))
+cellTypes <- c(new('CellType', name='DEFAULT', minCycle=36, cycleLength=function() runif(1,36,44)))
 cellTypeInitFreq <- c(1)
 drugs <- list()
 maxDeformation <- 0.1
