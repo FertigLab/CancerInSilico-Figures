@@ -18,9 +18,9 @@ getMeanScale <- function(mod, pwy)
 ## Figure 4b - pathway activity for fitted run
 
 pwyActivity <- data.frame(
-    activationGrowth=getMeanScale(fig4Data[[1]], pwyGrowth)
-    GtoS=getMeanScale(fig4Data[[1]], pwySPhase)
-    mitosis=getMeanScale(fig4Data[[1]], pwyMitosis)
+    activationGrowth=getMeanScale(fig4Data[[1]], pwyGrowth),
+    GtoS=getMeanScale(fig4Data[[1]], pwySPhase),
+    mitosis=getMeanScale(fig4Data[[1]], pwyMitosis),
     contactInhibition=getMeanScale(fig4Data[[1]], pwyContactInhibition))
 
 
