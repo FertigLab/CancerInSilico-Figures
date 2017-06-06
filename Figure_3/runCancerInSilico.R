@@ -7,7 +7,7 @@ returnSize <- as.integer(args[2])
 
 #### Set Defaults ####
 
-initialNum <- 80
+initialNum <- 100
 runTime <- 168
 density <- 0.2
 boundary <- 1
@@ -28,22 +28,19 @@ delta <- 0.2
 
 #### Set Custom Values ####
 
-allDensities <- seq(0.05, 0.45, 0.05)
-allSyncs <- c(TRUE, FALSE)
-allCellTypes <- lapply(seq(12,48,4), function(l) new('CellType',
+allDensities <- seq(0.05, 0.3, 0.05)
+allCellTypes <- lapply(seq(24,48,6), function(l) new('CellType',
     name='DEFAULT', minCycle=l, cycleLength=function() l))
-allDrugs <- lapply(seq(0.5, 1.0, 0.05), function(l) new('Drug',
+allDrugs <- lapply(seq(1.0, 2.0, 0.05), function(l) new('Drug',
     name='DEFAULT', timeAdded=24, cycleLengthEffect=function(a,b) b*l))
 
-dim <- c(length(allDensities), length(allSyncs), length(allCellTypes),
-    length(allDrugs))
+dim <- c(length(allDensities), length(allCellTypes), length(allDrugs))
 indexArray <- array(1:prod(dim), dim)
 index <- which(indexArray==arrayNum, arr.ind=TRUE)
 
 density <- allDensities[index[1]]
-syncCycles <- allSyncs[index[2]]
-cellTypes <- c(allCellTypes[index[3]])
-drugs <- c(allDrugs[index[4]])
+cellTypes <- c(allCellTypes[index[2]])
+drugs <- c(allDrugs[index[3]])
 
 #### Run Simulation ####
 
