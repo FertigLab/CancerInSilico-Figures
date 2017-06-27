@@ -18,6 +18,31 @@ heatmap.2(ge$expression, col=greenred, scale='row', trace='none',
     hclust=function(x) hclust(x,method='complete'),
     distfun=function(x) as.dist((1-cor(t(x)))/2),
     Colv=F)
+
+png(file='fig4a_growth.png')
+heatmap.2(ge$expression[pwyGrowth@genes,], col=greenred, scale='row', trace='none',
+    hclust=function(x) hclust(x,method='complete'),
+    distfun=function(x) as.dist((1-cor(t(x)))/2),
+    Colv=F)
+
+png(file='fig4a_mitosis.png')
+heatmap.2(ge$expression[pwyMitosis@genes,], col=greenred, scale='row', trace='none',
+    hclust=function(x) hclust(x,method='complete'),
+    distfun=function(x) as.dist((1-cor(t(x)))/2),
+    Colv=F)
+
+png(file='fig4a_sphase.png')
+heatmap.2(ge$expression[pwySPhase@genes,], col=greenred, scale='row', trace='none',
+    hclust=function(x) hclust(x,method='complete'),
+    distfun=function(x) as.dist((1-cor(t(x)))/2),
+    Colv=F)
+
+png(file='fig4a_contactInhibition.png')
+heatmap.2(ge$expression[pwyContactInhibition@genes,], col=greenred, scale='row', trace='none',
+    hclust=function(x) hclust(x,method='complete'),
+    distfun=function(x) as.dist((1-cor(t(x)))/2),
+    Colv=F)
+
 #dev.off()
 
 #heatmap.2(D.gene.avg[gp, paste(rep(0:14,2), rep(c('Control','Cetuximab'),each=15),sep=".")],
@@ -37,7 +62,7 @@ pwyActivity <- data.frame(hour=seq(0,168,24),
     activationGrowth=ge$pathways[[1]],
     mitosis=ge$pathways[[2]],
     GtoS=ge$pathways[[3]],
-    contactInhibition=1-ge$pathways[[4]])
+    contactInhibition=ge$pathways[[4]])
 
 fig <- ggplot(pwyActivity, aes(x=hour)) + geom_line(aes(y=GtoS)) +
     geom_line(aes(y=activationGrowth)) + geom_line(aes(y=mitosis)) + 
