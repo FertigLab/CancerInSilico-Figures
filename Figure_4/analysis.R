@@ -68,3 +68,5 @@ fig <- ggplot(pwyActivity, aes(x=hour)) + geom_line(aes(y=GtoS)) +
     geom_line(aes(y=activationGrowth)) + geom_line(aes(y=mitosis)) + 
     geom_line(aes(y=contactInhibition))
 ggsave(filename='fig4b.png', plot=fig)
+
+## Figure 4d - comparison of real gene expression data
