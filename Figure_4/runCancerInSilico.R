@@ -9,14 +9,14 @@ returnSize <- as.integer(args[2])
 
 initialNum <- 100
 runTime <- 168
-density <- 0.1
+density <- 0.045
 boundary <- 1
 syncCycles <- FALSE
 randSeed <- 0
 outputIncrement <- 4
 recordIncrement <- 1
 timeIncrement <- 0.001
-cellTypes <- c(new('CellType', name='DEFAULT', minCycle=36, cycleLength=function() runif(1,36,44)))
+cellTypes <- c(new('CellType', name='DEFAULT', minCycle=36, cycleLength=function() 36))
 cellTypeInitFreq <- c(1)
 drugs <- list()
 maxDeformation <- 0.1
@@ -28,8 +28,9 @@ delta <- 0.2
 
 #### Set Custom Values ####
 
-allDrugs <- lapply(seq(1.0, 2.0, 0.5), function(l) new('Drug',
-    name='DEFAULT', timeAdded=24, cycleLengthEffect=function(a,b) b*l))
+allDrugs <- lapply(c(1.0, 1.05, 1.2), function(l) new('Drug',
+    name='DEFAULT', timeAdded=24, cycleLengthEffect=function(a,b)
+    rnorm(n=1, mean=b*l, sd=4)))
 
 dim <- c(length(allDrugs))
 indexArray <- array(1:prod(dim), dim)
