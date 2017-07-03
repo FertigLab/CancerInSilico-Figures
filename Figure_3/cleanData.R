@@ -15,7 +15,7 @@ for (file in allFiles)
     fig3Data[[file]] <- list(
         'initDensity' = output@density,
         'numCells'    = nCells,
-        'drugEffect'  = mean(sapply(1:1000, output@drugs[[1]]@cycleLengthEffect(0,100))),
+        'drugEffect'  = mean(sapply(1:1000, function(dummy) output@drugs[[1]]@cycleLengthEffect(0,100))),
         'cycleLength' = output@cellTypes[[1]]@minCycle)
 
     fileNo <- fileNo + 1
