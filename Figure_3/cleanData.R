@@ -4,7 +4,7 @@ library(CancerInSilico)
 allFiles <- list.files(path='../Data/Figure_3', full.names = TRUE,
     recursive = TRUE, pattern = "*.RData")
 
-getDrugEffect <- function(drug)
+getDrugEffect <- function(d)
 {
     effect <- sapply(1:10000, function(dummy) d@cycleLengthEffect(0,1000))
     corrected <- 5 * round(mean(effect) / 5)
