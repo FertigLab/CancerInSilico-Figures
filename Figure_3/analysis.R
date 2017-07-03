@@ -15,7 +15,7 @@ timePoints <- seq(24,144,24)
 ### fit no drug data
 
 noDrugSims <- fig3Data[sapply(fig3Data, function(d) d$drugEffect==1)]
-
+print(fig3Data[[1]])
 l2 <- sapply(noDrugSims, function(sim)
     {
         nCells <- sim$numCells[timePoints]
@@ -23,6 +23,7 @@ l2 <- sapply(noDrugSims, function(sim)
         l2norm(nCells, noDrugData)
     })
 
+print(l2)
 noDrugFit <- noDrugSims[[which(l2==min(l2))]]
 noDrugFit$numCells <- noDrugFit$numCells * noDrugData[1] /
     noDrugFit$numCells[timePoints[1]]
