@@ -4,6 +4,8 @@ library(CancerInSilico)
 load('Figure_3_cleaned.RData') #fig3Data
 load('tangData.RData') #tangData
 
+# clean data further - convert mean drug effect to integer
+
 # useful
 l2norm <- function(a,b) sqrt(sum((a-b)^2))
 
