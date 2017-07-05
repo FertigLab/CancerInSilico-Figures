@@ -28,9 +28,13 @@ delta <- 0.2
 
 #### Set Custom Values ####
 
-allDrugs <- lapply(c(1.0, 1.05, 1.2), function(l) new('Drug',
-    name='DEFAULT', timeAdded=24, cycleLengthEffect=function(a,b)
-    rnorm(n=1, mean=b*l, sd=iflse(b==1.0, 0, 4))))
+pbs <- new('Drug', name='PBS', timeAdded=24, cycleLengthEffect=function(a,b) b)
+drug_10ug <- new('Drug', name='_10ug', timeAdded=24, cycleLengthEffect=
+    function(a,b) rnorm(n=1, mean=1.05*b, sd=4))
+drug_100ug <- new('Drug', name='_100ug', timeAdded=24, cycleLengthEffect=
+    function(a,b) rnorm(n=1, mean=1.2*b, sd=4))
+
+allDrugs <- list(pbs, drug_10ug, drug_100ug)
 
 dim <- c(length(allDrugs))
 indexArray <- array(1:prod(dim), dim)
@@ -48,7 +52,7 @@ if (!is.na(returnSize)) {
 
     repeat
     {
-        output <- runCellSimulation(initialNum=initialNum,
+        output <- inSilicoCellModel(initialNum=initialNum,
             runTime=runTime,
             density=density,
             boundary=boundary,
