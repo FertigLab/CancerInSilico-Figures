@@ -62,8 +62,8 @@ plotData <- data.frame(day=seq(1,7),
     drugSim100=drugFits[[which(doses==100)]]$numCells[timePoints])
 
 fig <- ggplot(plotData, aes(x=day)) + 
-    geom_point(aes(y=noDrugReal), size=2) + 
-    geom_line(aes(y=noDrugSim)) + 
+    geom_point(aes(y=noDrugReal, color='pbs'), size=2) + 
+    geom_line(aes(y=noDrugSim, color='pbs')) + 
     geom_point(aes(y=drugReal10, color='10ug'), size=2) +
     geom_line(aes(y=drugSim10, color='10ug')) +
     geom_point(aes(y=drugReal100, color='100ug'), size=2) +
