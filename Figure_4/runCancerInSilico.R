@@ -30,7 +30,7 @@ delta <- 0.2
 
 allDrugs <- lapply(c(1.0, 1.05, 1.2), function(l) new('Drug',
     name='DEFAULT', timeAdded=24, cycleLengthEffect=function(a,b)
-    rnorm(n=1, mean=b*l, sd=4)))
+    rnorm(n=1, mean=b*l, sd=iflse(b==1.0, 0, 4))))
 
 dim <- c(length(allDrugs))
 indexArray <- array(1:prod(dim), dim)
