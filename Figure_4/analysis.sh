@@ -1,7 +1,7 @@
 #!/bin/bash -l
 
 #SBATCH
-#SBATCH --job-name=cleanData
+#SBATCH --job-name=analysis
 #SBATCH --time=0:30:0
 #SBATCH --partition=shared
 #SBATCH --nodes=1
