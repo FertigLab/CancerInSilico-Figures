@@ -1,36 +1,9 @@
 library(ggplot2)
 library(gplots)
-library(methods)
 library(CancerInSilico)
-load('../Figure_4/Figure_4_cleaned.RData') #fig4Data
+library(methods)
+load('../Figure_4/Figure_4_cleaned.RData') #ge_pbs, ge_10ug, ge_100ug
 data(SamplePathways)
-
-sampFreq <- 4
-nCells <- 50
-hours <- seq(0,144,sampFreq)
-ndx <- 1:length(hours)
-
-## Figure 4d - gene expression data
-
-pwyGrowth <- calibratePathway(pwyGrowth, referenceGeneExpression)
-pwyMitosis <- calibratePathway(pwyMitosis, referenceGeneExpression)
-pwySPhase <- calibratePathway(pwySPhase, referenceGeneExpression)
-pwyContactInhibition <- calibratePathway(pwyContactInhibition,
-    referenceGeneExpression)
-allPwys <- c(pwyGrowth, pwyMitosis, pwySPhase, pwyContactInhibition)
-
-#Rprof()
-ge_pbs <- inSilicoGeneExpression(fig4Data[[1]], allPwys[c(1,2,3,4)],
-    nCells=nCells, sampFreq=sampFreq, perError=0.05)
-#Rprof(NULL)
-
-ge_10ug <- inSilicoGeneExpression(fig4Data[[2]], allPwys[c(1,2,3,4)],
-    nCells=nCells, sampFreq=sampFreq, perError=0.05)
-ge_100ug <- inSilicoGeneExpression(fig4Data[[3]], allPwys[c(1,2,3,4)],
-    nCells=nCells, sampFreq=sampFreq, perError=0.05)
-ge_pbs$expression <- ge_pbs$expression[,ndx]
-ge_10ug$expression <- ge_10ug$expression[,ndx]
-ge_100ug$expression <- ge_100ug$expression[,ndx]
 
 png(file='fig4d.png')
 heatmap.2(ge_100ug$expression, col=greenred, scale='row', trace='none',
@@ -57,7 +30,12 @@ heatmap.2(ge_100ug$expression[pwyContactInhibition@genes,], col=greenred, scale=
     trace='none', hclust=function(x) hclust(x,method='complete'),
     distfun=function(x) as.dist((1-cor(t(x)))/2), Colv=F, dendrogram='row')
 
-## Figure 4c - pathway activity for fitted simulations
+geneNames <- c(pwyContactInhibition@genes, pwyMitosis@genes, pwySPhase@genes,
+    pwyGrowth@genes)
+png(file='fig4d_realData.png')
+heatmap.2(referenceGeneExpression[geneNames,], col=greenred, scale='row',
+    trace='none', hclust=function(x) hclust(x,method='complete'),
+    distfun=function(x) as.dist((1-cor(t(x)))/2), Colv=F, dendrogram='row')
 
 movAvg <- function(data)
 {
