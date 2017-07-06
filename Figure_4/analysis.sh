@@ -2,7 +2,7 @@
 
 #SBATCH
 #SBATCH --job-name=cleanData
-#SBATCH --time=1:0:0
+#SBATCH --time=0:30:0
 #SBATCH --partition=shared
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
@@ -10,4 +10,4 @@
 #SBATCH --mail-type=end
 #SBATCH --mail-user=tsherma4@jhu.edu
 
-Rscript cleanData.R
+Rscript analysis.R
