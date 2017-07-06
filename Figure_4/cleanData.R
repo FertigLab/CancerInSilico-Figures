@@ -68,6 +68,6 @@ pwyActivity <- data.frame(hour=hours,
     contactInhibition_100ug =   ge_100ug$pathways[[4]][col_ndx]
 )
 
-save(hours, ge_pbs, ge_10ug, ge_100ug, pwyActivity,
+save(ge_pbs, ge_10ug, ge_100ug, pwyActivity,
     file='Figure_4_cleaned.RData')
 
