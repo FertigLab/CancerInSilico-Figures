@@ -56,7 +56,7 @@ if (!is.na(returnSize)) {
 
     repeat
     {
-        output <- runCellSimulation(initialNum=initialNum,
+        output <- inSilicoCellModel(initialNum=initialNum,
             runTime=runTime,
             density=density,
             boundary=boundary,
