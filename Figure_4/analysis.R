@@ -37,36 +37,6 @@ heatmap.2(referenceGeneExpression[geneNames,], col=greenred, scale='row',
     trace='none', hclust=function(x) hclust(x,method='complete'),
     distfun=function(x) as.dist((1-cor(t(x)))/2), Colv=F, dendrogram='row')
 
-movAvg <- function(data)
-{
-    window <- 24 / sampFreq
-    avg <- c()    
-    for (i in 1:length(data))
-    {
-        mn <- max(1, i - window)
-        mx <- min(length(data), i + window)
-        avg <- c(avg, mean(data[mn:mx]))
-    }
-    return(avg)
-}
-
-pwyActivity <- data.frame(hour=hours,
-    activationGrowth_pbs    =   ge_pbs$pathways[[1]][ndx],
-    mitosis_pbs             =   movAvg(ge_pbs$pathways[[2]][ndx]),
-    GtoS_pbs                =   movAvg(ge_pbs$pathways[[3]][ndx]),
-    contactInhibition_pbs   =   ge_pbs$pathways[[4]][ndx],
-
-    activationGrowth_10ug   =   ge_10ug$pathways[[1]][ndx],
-    mitosis_10ug            =   movAvg(ge_10ug$pathways[[2]][ndx]),
-    GtoS_10ug               =   movAvg(ge_10ug$pathways[[3]][ndx]),
-    contactInhibition_10ug  =   ge_10ug$pathways[[4]][ndx],
-
-    activationGrowth_100ug  =   ge_100ug$pathways[[1]][ndx],
-    mitosis_100ug           =   movAvg(ge_100ug$pathways[[2]][ndx]),
-    GtoS_100ug              =   movAvg(ge_100ug$pathways[[3]][ndx]),
-    contactInhibition_100ug =   ge_100ug$pathways[[4]][ndx]
-)
-
 fig4c <- ggplot(pwyActivity, aes(x=hour)) +
     geom_line(aes(y=activationGrowth_100ug, color='Growth Rate', linetype='100ug')) +
     geom_line(aes(y=mitosis_100ug,          color='Mitosis', linetype='100ug')) +
