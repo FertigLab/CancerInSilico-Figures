@@ -4,6 +4,13 @@ library(CancerInSilico)
 allFiles <- list.files(path='../Data/Figure_3', full.names = TRUE,
     recursive = TRUE, pattern = "*.RData")
 
+getDrugEffect <- function(d)
+{
+    effect <- sapply(1:10000, function(dummy) d@cycleLengthEffect(0,1000))
+    corrected <- 5 * round(mean(effect) / 5)
+    return(corrected / 1000)
+}
+
 fileNo <- 1
 pb <- txtProgressBar(min=1, max=length(allFiles), style=3)
 fig3Data <- list()
@@ -15,7 +22,7 @@ for (file in allFiles)
     fig3Data[[file]] <- list(
         'initDensity' = output@density,
         'numCells'    = nCells,
-        'drugEffect'  = output@drugs[[1]]@cycleLengthEffect(0,1),
+        'drugEffect'  = getDrugEffect(output@drugs[[1]]),
         'cycleLength' = output@cellTypes[[1]]@minCycle)
 
     fileNo <- fileNo + 1

@@ -28,11 +28,12 @@ delta <- 0.2
 
 #### Set Custom Values ####
 
-allDensities <- seq(0.05, 0.3, 0.05)
-allCellTypes <- lapply(seq(24,48,6), function(l) new('CellType',
+allDensities <- seq(0.001, 0.1, length=10)
+allCellTypes <- lapply(seq(24,36,6), function(l) new('CellType',
     name='DEFAULT', minCycle=l, cycleLength=function() l))
 allDrugs <- lapply(seq(1.0, 2.0, 0.05), function(l) new('Drug',
-    name='DEFAULT', timeAdded=24, cycleLengthEffect=function(a,b) b*l))
+    name='DEFAULT', timeAdded=24, cycleLengthEffect=function(a,b)
+    rnorm(n=1, mean=b*l, sd=4)))
 
 dim <- c(length(allDensities), length(allCellTypes), length(allDrugs))
 indexArray <- array(1:prod(dim), dim)
