@@ -30,8 +30,8 @@ heatmap.2(ge_100ug$expression[pwyContactInhibition@genes,], col=greenred, scale=
     trace='none', hclust=function(x) hclust(x,method='complete'),
     distfun=function(x) as.dist((1-cor(t(x)))/2), Colv=F, dendrogram='row')
 
-geneNames <- c(pwyContactInhibition@genes, pwyMitosis@genes, pwySPhase@genes,
-    pwyGrowth@genes)
+geneNames <- unique(c(pwyContactInhibition@genes, pwyMitosis@genes, pwySPhase@genes,
+    pwyGrowth@genes))
 png(file='fig4d_realData.png')
 heatmap.2(referenceGeneExpression[geneNames,], col=greenred, scale='row',
     trace='none', hclust=function(x) hclust(x,method='complete'),
