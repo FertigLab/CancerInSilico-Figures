@@ -6,7 +6,7 @@ allFiles <- list.files(path='../Data/Figure_5', full.names = TRUE,
 
 fileNo <- 1
 pb <- txtProgressBar(min=1, max=length(allFiles), style=3)
-final_proportion_data <- list()
+fig5data <- list()
 for (file in allFiles)
 {
     load(file)
@@ -14,8 +14,8 @@ for (file in allFiles)
     cellTypeBFreq <- output@cellTypeInitFreq[2]
     cellTypeBCycleLength <- output@cellTypes[[2]]@minCycle
 
-    finalCellTypes <- sapply(1:getNumberOfCells(output, output@runtime),
-        getCellType, model=output, time=output@runtime)
+    finalCellTypes <- sapply(1:getNumberOfCells(output, output@runTime),
+        getCellType, model=output, time=output@runTime)
 
     cellTypeBFinalFreq <- sum(finalCellTypes==2) / length(finalCellTypes)
 
