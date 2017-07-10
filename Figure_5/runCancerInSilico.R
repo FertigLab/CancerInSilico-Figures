@@ -7,9 +7,9 @@ returnSize <- as.integer(args[2])
 
 #### Set Defaults ####
 
-initialNum <- 80
+initialNum <- 100
 runTime <- 168
-density <- 0.2
+density <- 0.05
 boundary <- 1
 syncCycles <- FALSE
 randSeed <- 0
@@ -28,19 +28,23 @@ delta <- 0.2
 
 #### Set Custom Values ####
 
-allInitFreq_typeA <- seq(0,1,0.05)
-allCellTypes_typeB <- lapply(seq(12,36,4), function(l) new('CellType', name='B', minCycle=l, cycleLength=function() l))
+cellTypeA <- new('CellType', name='A', cycleLength=function() 24, minCycle=24)
 
-dim <- c(length(allInitFreq_typeA), length(allCellTypes_typeB))
+allCellTypeBFreq <- seq(0,1,0.2)
+allCellTypeB <- lapply(seq(12,36,6), function(l) new('CellType',
+    name='B', minCycle=l, cycleLength=function() l))
+allDensities <- c(0.001, 0.005, 0.01, 0.025, 0.05)
+
+dim <- c(length(allCellTypeBFreq), length(allCellTypeB), length(allDensities))
 indexArray <- array(1:prod(dim), dim)
 index <- which(indexArray==arrayNum, arr.ind=TRUE)
 
-initFreq_typeA <- allInitFreq_typeA[index[1]]
-ctB <- allCellTypes_typeB[index[2]]
-ctA <- new('CellType', name='A', cycleLength=function() {return(36)}, minCycle=36)
+cellTypeBFreq <- allCellTypeBFreq[index[1]]
+cellTypeB <- allCellTypeB[index[2]]
+density <- allDensities[index[3]]
 
-cellTypes <- c(ctA, ctB)
-cellTypeInitFreq <- c(initFreq_typeA, 1 - initFreq_typeA)
+cellTypes <- c(cellTypeA, cellTypeB)
+cellTypeInitFreq <- c(1 - cellTypeBFreq, cellTypeBFreq)
 
 #### Run Simulation ####
 
@@ -52,7 +56,7 @@ if (!is.na(returnSize)) {
 
     repeat
     {
-        output <- runCellSimulation(initialNum=initialNum,
+        output <- inSilicoCellModel(initialNum=initialNum,
             runTime=runTime,
             density=density,
             boundary=boundary,

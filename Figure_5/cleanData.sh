@@ -10,4 +10,4 @@
 #SBATCH --mail-type=end
 #SBATCH --mail-user=tsherma4@jhu.edu
 
-Rscript analysis.R
+time Rscript cleanData.R
