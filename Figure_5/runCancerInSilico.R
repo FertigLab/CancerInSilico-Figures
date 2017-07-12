@@ -54,8 +54,6 @@ if (!is.na(returnSize)) {
 
 } else {
 
-    repeat
-    {
         output <- inSilicoCellModel(initialNum=initialNum,
             runTime=runTime,
             density=density,
@@ -74,12 +72,7 @@ if (!is.na(returnSize)) {
             maxRotation=maxRotation,
             nG=nG,
             epsilon=epsilon,
-            delta=delta
-        )
-        randSeed <- randSeed + 100
-
-        if (length(output@cells) > output@runTime / output@recordIncrement)
-            break
+           delta=delta
     }
 
     save(output, file=paste("output_", arrayNum, ".RData", sep=""))
