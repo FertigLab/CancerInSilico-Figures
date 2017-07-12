@@ -44,39 +44,30 @@ drugs <- c(allDrugs[index[1]])
 
 #### Run Simulation ####
 
-if (!is.na(returnSize)) {
-
+if (!is.na(returnSize))
+{
     cat(as.numeric(prod(dim)))
-
-} else {
-
-    repeat
-    {
-        output <- inSilicoCellModel(initialNum=initialNum,
-            runTime=runTime,
-            density=density,
-            boundary=boundary,
-            syncCycles=syncCycles,
-            randSeed=randSeed,
-            modelType=modelType,
-            outputIncrement=outputIncrement,
-            recordIncrement=recordIncrement,
-            timeIncrement=timeIncrement,
-            cellTypes=cellTypes,
-            cellTypeInitFreq=cellTypeInitFreq,
-            drugs=drugs,
-            maxDeformation=maxDeformation,
-            maxTranslation=maxTranslation,
-            maxRotation=maxRotation,
-            nG=nG,
-            epsilon=epsilon,
-            delta=delta
-        )
-        randSeed <- randSeed + 100
-
-        if (length(output@cells) > output@runTime / output@recordIncrement)
-            break
-    }
-
+}
+else
+{
+    output <- inSilicoCellModel(initialNum=initialNum,
+        runTime=runTime,
+        density=density,
+        boundary=boundary,
+        syncCycles=syncCycles,
+        randSeed=randSeed,
+        modelType=modelType,
+        outputIncrement=outputIncrement,
+        recordIncrement=recordIncrement,
+        timeIncrement=timeIncrement,
+        cellTypes=cellTypes,
+        cellTypeInitFreq=cellTypeInitFreq,
+        drugs=drugs,
+        maxDeformation=maxDeformation,
+        maxTranslation=maxTranslation,
+        maxRotation=maxRotation,
+        nG=nG,
+        epsilon=epsilon,
+        delta=delta
     save(output, file=paste("output_", arrayNum, ".RData", sep=""))
 }

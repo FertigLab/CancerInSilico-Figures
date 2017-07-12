@@ -11,7 +11,7 @@ for (file in allFiles)
 {
     load(file)
 
-    cellTypeBFreq <- output@cellTypeInitFreq[2]
+    cellTypeBInitFreq <- output@cellTypeInitFreq[2]
     cellTypeBCycleLength <- output@cellTypes[[2]]@minCycle
 
     finalCellTypes <- sapply(1:getNumberOfCells(output, output@runTime),
@@ -19,7 +19,7 @@ for (file in allFiles)
 
     cellTypeBFinalFreq <- sum(finalCellTypes==2) / length(finalCellTypes)
 
-    fig5data[[file]] <- c(cellTypeBFreq, cellTypeBCycleLength, cellTypeBFinalFreq)
+    fig5data[[file]] <- c(cellTypeBInitFreq, cellTypeBCycleLength, cellTypeBFinalFreq)
 
     fileNo <- fileNo + 1
     setTxtProgressBar(pb, fileNo)
