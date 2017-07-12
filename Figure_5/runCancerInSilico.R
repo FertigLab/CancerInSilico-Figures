@@ -48,12 +48,12 @@ cellTypeInitFreq <- c(1 - cellTypeBFreq, cellTypeBFreq)
 
 #### Run Simulation ####
 
-if (!is.na(returnSize))
-{
+if (!is.na(returnSize)) {
+
     cat(as.numeric(prod(dim)))
-}
-else
-{
+
+} else {
+
     output <- inSilicoCellModel(initialNum=initialNum,
         runTime=runTime,
         density=density,
@@ -75,6 +75,7 @@ else
         delta=delta
 
     save(output, file=paste("output_", arrayNum, ".RData", sep=""))
+
 }
 
 

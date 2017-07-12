@@ -45,12 +45,12 @@ drugs <- c(allDrugs[index[3]])
 
 #### Run Simulation ####
 
-if (!is.na(returnSize))
-{
+if (!is.na(returnSize)) {
+
     cat(as.numeric(prod(dim)))
-}
-else
-{
+
+} else {
+
     output <- runCellSimulation(initialNum=initialNum,
         runTime=runTime,
         density=density,
@@ -72,4 +72,5 @@ else
         delta=delta
 
     save(output, file=paste("output_", arrayNum, ".RData", sep=""))
+
 }
