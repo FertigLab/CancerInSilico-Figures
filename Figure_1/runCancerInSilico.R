@@ -62,6 +62,8 @@ if (!is.na(returnSize)) {
         nG=nG,
         epsilon=epsilon,
         delta=delta
+    )
+
     save(output, file=paste("output_", arrayNum, ".RData", sep=""))
 
 }
