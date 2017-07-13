@@ -1,0 +1,19 @@
+#!/bin/bash
+
+if [ "$1" != "" ]; then
+    DIR=$1
+else
+    echo "no output directory"
+    exit 1
+fi
+
+THIS_SCRIPT=$(readlink -f "$0")
+SIZE=$(Rscript $THIS_SCRIPT.R 1 0)
+
+echo "shell script called: $THIS_SCRIPT.sh"
+echo "Rscript called: $THIS_SCRIPT.R"
+echo "Output Directory: $DIR"
+echo "Total Runs: $SIZE"
+
+mkdir -p $DIR
+sbatch -D $DIR --array=1-$SIZE $THIS_SCRIPT.sh $THIS_SCRIPT.R

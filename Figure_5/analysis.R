@@ -1,33 +1,23 @@
-# library('CancerInSilico')
+library('CancerInSilico')
 library('ggplot2')
 library('RColorBrewer')  
 library('reshape2') 
 library(methods)
+load("Figure_5_cleaned.RData")
 
-makeHeatMap <- function(final_proportion_data) {
+cellTypeBInitFreq <- sort(unique(sapply(fig5data, function(x) x[1])))
+cellTypeBCycleLength <- sort(unique(sapply(fig5data, function(x) x[2])))
 
-	ordered_init_prop_typeA <- sort(unique(sapply(final_proportion_data, function(x) x[1])))
-	ordered_cycle_length_typeB <- sort(unique(sapply(final_proportion_data, function(x) x[2])))
+mat <- matrix(nrow=length(cellTypeBInitFreq), ncol=length(cellTypeBCycleLength))
 
-	num_rows <- length(ordered_init_prop_typeA)
-	num_cols <- length(ordered_cycle_length_typeB)
-
-	final_proportion_mat <- matrix(nrow = num_rows, ncol = num_cols, dimnames = list(ordered_init_prop_typeA, ordered_cycle_length_typeB))
-
-	for (data in final_proportion_data) {
-
-		xind <- which(ordered_init_prop_typeA == data[1])
-		yind <- which(ordered_cycle_length_typeB == data[2])
-
-		final_proportion_mat[xind, yind] <- data[3]
-	}
-	
-	return(final_proportion_mat)
-
+for (data in fig5data)
+{
+	xind <- which(cellTypeBInitFreq == data[1])
+	yind <- which(cellTypeBCycleLength == data[2])
+	mat[xind, yind] <- data[3]
 }
 
-load("Figure_5a_cleaned.RData")
-fpm <- makeHeatMap(final_proportion_data)
+fpm <- makeHeatMap(mat)
 fpm.melted <- melt(fpm)
 hm.palette <- colorRampPalette(rev(brewer.pal(9, 'YlOrRd')), space='Lab')
 fig <- ggplot(fpm.melted, aes(x = Var1, y = Var2, fill = value)) +
