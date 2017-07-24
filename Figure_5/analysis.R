@@ -17,7 +17,7 @@ for (data in fig5data)
 	mat[xind, yind] <- data[3]
 }
 
-fpm <- makeHeatMap(mat)
+fpm <- mat
 fpm.melted <- melt(fpm)
 hm.palette <- colorRampPalette(rev(brewer.pal(9, 'YlOrRd')), space='Lab')
 fig <- ggplot(fpm.melted, aes(x = Var1, y = Var2, fill = value)) +

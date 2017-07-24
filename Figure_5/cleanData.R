@@ -19,7 +19,10 @@ for (file in allFiles)
 
     cellTypeBFinalFreq <- sum(finalCellTypes==2) / length(finalCellTypes)
 
-    fig5data[[file]] <- c(cellTypeBInitFreq, cellTypeBCycleLength, cellTypeBFinalFreq)
+    fig5data[[file]] <- list('cellTypeBInitFreq'=cellTypeBInitFreq,
+                             'cellTypeBCycleLength'=cellTypeBCycleLength,
+                             'cellTypeBFinalFreq'=cellTypeBFinalFreq,
+                             'density'=output@density)
 
     fileNo <- fileNo + 1
     setTxtProgressBar(pb, fileNo)
