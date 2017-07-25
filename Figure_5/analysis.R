@@ -5,11 +5,12 @@ library('reshape2')
 library(methods)
 load("Figure_5_cleaned.RData")
 
-cellTypeBInitFreq <- sort(unique(sapply(fig5data, function(x) x[1])))
-cellTypeBCycleLength <- sort(unique(sapply(fig5data, function(x) x[2])))
+df <- data.frame(initFreq = sapply(fig5data, function(x) x$cellTypeBInitFreq),
+           finalFreq = sapply(fig5data, function(x) x$cellTypeBFinalFreq),
+           cycleLength = sapply(fig5data, function(x) x$cellTypeBCycleLength),
+           density = sapply(fig5data, function(x) x$density))
 
 mat <- matrix(nrow=length(cellTypeBInitFreq), ncol=length(cellTypeBCycleLength))
-
 for (data in fig5data)
 {
 	xind <- which(cellTypeBInitFreq == data[1])
