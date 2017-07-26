@@ -10,6 +10,8 @@ df <- data.frame(initFreq = sapply(fig5data, function(x) x$cellTypeBInitFreq),
            cycleLength = sapply(fig5data, function(x) x$cellTypeBCycleLength),
            density = sapply(fig5data, function(x) x$density))
 
+fig <- ggplot(df, 
+
 mat <- matrix(nrow=length(cellTypeBInitFreq), ncol=length(cellTypeBCycleLength))
 for (data in fig5data)
 {
