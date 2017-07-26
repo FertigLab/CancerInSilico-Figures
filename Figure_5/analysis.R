@@ -5,7 +5,7 @@ library('reshape2')
 library(methods)
 load("Figure_5_cleaned.RData")
 
-fig <- ggplot(fig5data, aes(x=time)) + 
+fig <- ggplot(subset(fig5data, density == 0.05 & cycleLength %in% c(12,18,24)), aes(x=time)) + 
     geom_point(aes(y=cellTypeBFreq)) 
 ggsave(filename='fig5a.png', plot=fig)
 

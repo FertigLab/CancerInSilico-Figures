@@ -28,12 +28,12 @@ delta <- 0.2
 
 #### Set Custom Values ####
 
-cellTypeA <- new('CellType', name='A', cycleLength=function() 24, minCycle=24)
+cellTypeA <- new('CellType', name='A', cycleLength=function() 32, minCycle=32)
 
-allCellTypeBFreq <- seq(0,1,0.2)
-allCellTypeB <- lapply(seq(12,36,6), function(l) new('CellType',
+allCellTypeBFreq <- seq(0,0.5,0.05)
+allCellTypeB <- lapply(seq(8,48,6), function(l) new('CellType',
     name='B', minCycle=l, cycleLength=function() l))
-allDensities <- c(0.001, 0.005, 0.01, 0.025, 0.05)
+allDensities <- c(1e-5, 5e-5, 1e-4, 5e-4, 1e-3, 5e-3, 0.01, 0.05)
 
 dim <- c(length(allCellTypeBFreq), length(allCellTypeB), length(allDensities))
 indexArray <- array(1:prod(dim), dim)
