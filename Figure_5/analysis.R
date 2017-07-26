@@ -5,13 +5,6 @@ library('reshape2')
 library(methods)
 load("Figure_5_cleaned.RData")
 
-df <- data.frame(initFreq = sapply(fig5data, function(x) x$cellTypeBInitFreq),
-           finalFreq = sapply(fig5data, function(x) x$cellTypeBFinalFreq),
-           cycleLength = sapply(fig5data, function(x) x$cellTypeBCycleLength),
-           density = sapply(fig5data, function(x) x$density))
-
-fig <- ggplot(df, 
-
 mat <- matrix(nrow=length(cellTypeBInitFreq), ncol=length(cellTypeBCycleLength))
 for (data in fig5data)
 {

@@ -6,27 +6,31 @@ allFiles <- list.files(path='../Data/Figure_5', full.names = TRUE,
 
 fileNo <- 1
 pb <- txtProgressBar(min=1, max=length(allFiles), style=3)
-fig5data <- list()
+cellTypeBFreq <- c()
+cycleLength <- c()
+density <- c()
 for (file in allFiles)
 {
     load(file)
 
-    cellTypeBInitFreq <- output@cellTypeInitFreq[2]
-    cellTypeBCycleLength <- output@cellTypes[[2]]@minCycle
+    getCellTypeBFreq <- function(time)
+    {
+        cellTypes <- sapply(1:getNumberOfCells(output, time),
+            getCellType, model=output, time=time)
+        freq <- sum(cellTypes==2) / length(cellTypes)
+    } 
 
-    finalCellTypes <- sapply(1:getNumberOfCells(output, output@runTime),
-        getCellType, model=output, time=output@runTime)
+    N <- output@runTime
+    cellTypeBFreq <- sapply(0:N, getCellTypeBFreq)
 
-    cellTypeBFinalFreq <- sum(finalCellTypes==2) / length(finalCellTypes)
-
-    fig5data[[file]] <- list('cellTypeBInitFreq'=cellTypeBInitFreq,
-                             'cellTypeBCycleLength'=cellTypeBCycleLength,
-                             'cellTypeBFinalFreq'=cellTypeBFinalFreq,
-                             'density'=output@density)
+    cycleLength <- rep(output@cellTypes[[2]]@minCycle, N + 1)
+    density <- rep(output@density, N + 1)
 
     fileNo <- fileNo + 1
     setTxtProgressBar(pb, fileNo)
 }
+fig5data <- data.frame(cellTypeBFreq = cellTypeBFreq,
+    cycleLength = cycleLength, density = density)
 close(pb)
 print('saving...')
 save(fig5data, file='Figure_5_cleaned.RData')
