@@ -1,7 +1,7 @@
 library(CancerInSilico)
 
 ## read data, extract neccesary info
-allFiles <- list.files(path='../Data/Figure_4', full.names = TRUE,
+allFiles <- list.files(path='~/data/figure_data/Figure_4', full.names = TRUE,
     recursive = TRUE, pattern = "*.RData")
 
 fig4Data <- list()
