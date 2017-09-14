@@ -18,7 +18,7 @@ params@nCells <- 50
 params@sampleFreq <- 4
 params@perError <- 0.05
 
-hours <- seq(0,144,sampFreq)
+hours <- seq(0,144,params@sampleFreq)
 colNdx <- 1:length(hours)
 
 data(SamplePathways)

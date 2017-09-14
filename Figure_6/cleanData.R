@@ -18,7 +18,7 @@ params@nCells <- 50
 params@sampleFreq <- 4
 params@splatParams <- splatter::setParam(params@splatParams, "dropout.present", TRUE)
 
-hours <- seq(0,144,sampFreq)
+hours <- seq(0,144,params@sampleFreq)
 colNdx <- 1:length(hours)
 
 data(SamplePathways)
@@ -31,9 +31,9 @@ pwySPhase <- calibratePathway(pwySPhase, refCountData)
 pwyContactInhibition <- calibratePathway(pwyContactInhibition, refCountData)
 allPwys <- c(pwyGrowth, pwyMitosis, pwySPhase, pwyContactInhibition)
 
-ge_pbs <- inSilicoGeneExpression(fig4Data[[1]], allPwys, params)
-ge_10ug <- inSilicoGeneExpression(fig4Data[[2]], allPwys, params)
-ge_100ug <- inSilicoGeneExpression(fig4Data[[3]], allPwys, params)
+ge_pbs <- inSilicoGeneExpression(fig6Data[[1]], allPwys, params)
+ge_10ug <- inSilicoGeneExpression(fig6Data[[2]], allPwys, params)
+ge_100ug <- inSilicoGeneExpression(fig6Data[[3]], allPwys, params)
 
 ge_pbs$expression <- ge_pbs$expression[,colNdx]
 ge_10ug$expression <- ge_10ug$expression[,colNdx]
