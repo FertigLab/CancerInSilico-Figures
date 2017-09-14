@@ -2,7 +2,7 @@ library(ggplot2)
 library(gplots)
 library(CancerInSilico)
 library(methods)
-load('../Figure_4/Figure_4_cleaned.RData') #ge_pbs, ge_10ug, ge_100ug, pwyActivity
+load('Figure_4_cleaned.RData') #ge_pbs, ge_10ug, ge_100ug, pwyActivity
 data(SamplePathways)
 
 png(file='fig4d.png')
