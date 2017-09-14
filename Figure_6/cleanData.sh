@@ -2,7 +2,7 @@
 
 #SBATCH
 #SBATCH --job-name=cleanData
-#SBATCH --time=0:30:0
+#SBATCH --time=1:00:0
 #SBATCH --partition=shared
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
