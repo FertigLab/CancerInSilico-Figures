@@ -35,10 +35,6 @@ ge_pbs <- inSilicoGeneExpression(fig6Data[[1]], allPwys, params)
 ge_10ug <- inSilicoGeneExpression(fig6Data[[2]], allPwys, params)
 ge_100ug <- inSilicoGeneExpression(fig6Data[[3]], allPwys, params)
 
-ge_pbs$expression <- ge_pbs$expression[,colNdx]
-ge_10ug$expression <- ge_10ug$expression[,colNdx]
-ge_100ug$expression <- ge_100ug$expression[,colNdx]
-
 movAvg <- function(data)
 {
     window <- 24 / params@sampleFreq
