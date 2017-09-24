@@ -28,29 +28,57 @@ delta <- 0.2
 
 #### Set Custom Values ####
 
-cellTypeA <- new('CellType', name='A', cycleLength=function() 32, minCycle=32)
+# first sweep, single cell type, fixed mean change variance
+mean <- 24
+sd <- c(0.1, 0.5, 1, 2, 4, 6, 8, 10)
 
-allCellTypeBFreq <- seq(0,0.5,0.05)
-allCellTypeB <- lapply(seq(8,48,6), function(l) new('CellType',
-    name='B', minCycle=l, cycleLength=function() l))
-allDensities <- c(1e-5, 5e-5, 1e-4, 5e-4, 1e-3, 5e-3, 0.01, 0.05)
+# second sweep, two cell types, fix variance, change mean and freq
+freqA <- seq(0, 1.0, 0.1)
+freqB <- 1 - freqA
+meanA <- c(10, 14, 18, 22)
+meanB <- c(38, 34, 30, 26)
+sdA <- 1
+sdB <- 1
 
-dim <- c(length(allCellTypeBFreq), length(allCellTypeB), length(allDensities))
-indexArray <- array(1:prod(dim), dim)
-index <- which(indexArray==arrayNum, arr.ind=TRUE)
+# | Afreq | Bfreq | Amean | Bmean | Asd | Bsd |
+scenario1 <- matrix(nrow = length(sd), ncol = 6)
+scenario1[,1] = 1
+scenario1[,2] = 0
+scenario1[,3] = rep(mean, nrow(scenario1))
+scenario1[,4] = rep(0, nrow(scenario1))
+scenario1[,5] = sd
+scenario1[,6] = rep(0, nrow(scenario1))
 
-cellTypeBFreq <- allCellTypeBFreq[index[1]]
-cellTypeB <- allCellTypeB[index[2]]
-density <- allDensities[index[3]]
+# | Afreq | Bfreq | Amean | Bmean | Asd | Bsd |
+scenario2 <- matrix(nrow = length(meanA) * length(freqA), ncol = 6)
+scenario2[,1] = rep(freqA, each=length(meanA))
+scenario2[,2] = 1 - scenario2[,1]
+scenario2[,3] = rep(meanA, times=length(freqA))
+scenario2[,4] = rep(meanB, times=length(freqA))
+scenario2[,5] = rep(sdA, times=nrow(scenario2))
+scenario2[,6] = rep(sdB, times=nrow(scenario2))
+
+allScenarios <- rbind(scenario1, scenario2) 
+
+# parameters used
+meanA <- allScenarios[arrayNum, 3]
+meanB <- allScenarios[arrayNum, 4]
+sdA <- allScenarios[arrayNum, 5]
+sdB <- allScenarios[arrayNum, 6]
+
+cellTypeA <- new('CellType', name='A', minCycle=meanA - 2*sdA,
+    cycleLength=function() max(meanA - 2*sdA, rnorm(1,meanA,sdA)))
+cellTypeB <- new('CellType', name='B', minCycle=meanB - 2*sdB,
+    cycleLength=function() max(meanB - 2*sdB, rnorm(1,meanB,sdB)))
 
 cellTypes <- c(cellTypeA, cellTypeB)
-cellTypeInitFreq <- c(1 - cellTypeBFreq, cellTypeBFreq)
+cellTypeInitFreq <- c(allScenarios[arrayNum, 1], allScenarios[arrayNum, 2])
 
 #### Run Simulation ####
 
 if (!is.na(returnSize)) {
 
-    cat(as.numeric(prod(dim)))
+    cat(as.numeric(nrow(allScenarios)))
 
 } else {
 
