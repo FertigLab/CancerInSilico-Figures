@@ -35,6 +35,12 @@ ge_pbs <- inSilicoGeneExpression(fig6Data[[1]], allPwys, params)
 ge_10ug <- inSilicoGeneExpression(fig6Data[[2]], allPwys, params)
 ge_100ug <- inSilicoGeneExpression(fig6Data[[3]], allPwys, params)
 
+params@singleCell <- FALSE
+
+ge_pbs_bulk <- inSilicoGeneExpression(fig6Data[[1]], allPwys, params)
+ge_10ug_bulk <- inSilicoGeneExpression(fig6Data[[2]], allPwys, params)
+ge_100ug_bulk <- inSilicoGeneExpression(fig6Data[[3]], allPwys, params)
+
 movAvg <- function(data)
 {
     window <- 24 / params@sampleFreq
