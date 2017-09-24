@@ -1,5 +1,5 @@
 library(ggplot2)
-load('PDXData_cleaned.RData')
+load('~/FertigLab/CancerInSilico/Figures/Mouse_Data/PDXData_cleaned.RData')
 pdxData <- na.omit(pdxData)
 
 ## get distribution
@@ -36,6 +36,9 @@ ggplot(subset(pdxData, model=='409_PDX_F2'), aes(x=day, color=treatment)) +
 
 ggplot(subset(pdxData, treatment=='PBS'), aes(x=day, color=model)) + 
     geom_line(aes(y=tumorVol, linetype=as.character(mouseID)))
+
+ggplot(subset(pdxData, treatment=='CET'), aes(x=day, color=model)) + 
+  geom_line(aes(y=tumorVol, linetype=as.character(mouseID)))
 
 ggplot(pdxData, aes(x=day, color=model)) + 
     geom_line(aes(y=tumorVol, linetype=as.character(mouseID)))
