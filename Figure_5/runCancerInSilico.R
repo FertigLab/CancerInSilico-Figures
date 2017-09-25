@@ -45,7 +45,7 @@ scenario1 <- matrix(nrow = length(sd), ncol = 6)
 scenario1[,1] = 1
 scenario1[,2] = 0
 scenario1[,3] = rep(mean, nrow(scenario1))
-scenario1[,4] = rep(0, nrow(scenario1))
+scenario1[,4] = rep(mean, nrow(scenario1))
 scenario1[,5] = sd
 scenario1[,6] = rep(0, nrow(scenario1))
 
