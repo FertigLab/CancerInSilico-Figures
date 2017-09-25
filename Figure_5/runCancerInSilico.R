@@ -40,18 +40,17 @@ typeB <- lapply(c(38,34,30,26), function(mean) new('CellType', name='B', minCycl
 
 total <- length(sd) + length(typeA) * length(freqA)
 
-arrayNum <- (arrayNum - 1) %% total + 1
-repit <- floor((arrayNum - 1) / total) + 1
+index <- (arrayNum - 1) %% total + 1
 
-if (arrayNum <= length(sd))
+if (index <= length(sd))
 {
-    cellTypeA <- typeDEF[[arrayNum]]
-    cellTypeB <- typeDEF[[arrayNum]]
+    cellTypeA <- typeDEF[[index]]
+    cellTypeB <- typeDEF[[index]]
     cellTypeInitFreq <- c(1,0)
 
 } else {
 
-    n <- arrayNum - length(sd) - 1
+    n <- index - length(sd) - 1
     i1 <- (n %% length(typeA)) + 1
     i2 <- floor(n / length(typeA)) + 1
 
