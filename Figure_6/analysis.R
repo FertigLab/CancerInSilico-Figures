@@ -1,14 +1,33 @@
 library(ggplot2)
 library(gplots)
 library(CancerInSilico)
+library(scater)
 library(methods)
 load('Figure_6_cleaned.RData') #ge_pbs, ge_10ug, ge_100ug, pwyActivity
 data(SamplePathways)
 
-#png(file='fig6d.png')
-#heatmap.2(ge_100ug_bulk$expression, col=greenred, scale='row', trace='none',
-#    hclust=function(x) hclust(x,method='complete'),
-#    distfun=function(x) as.dist((1-cor(t(x)))/2), Colv=F, dendrogram='row')
+getSCE <- function(counts)
+{
+    phenos <- new('AnnotatedDataFrame', data = data.frame(Cell = colnames(counts)))
+    rownames(phenos) <- colnames(counts)
+    features <- new('AnnotatedDataFrame', data = data.frame(Gene = rownames(counts)))
+    rownames(features) <- rownames(counts)
+    sim <- scater:::newSCESet(countData = counts, phenoData = phenos, featureData = features)
+
+    sce <- scater::newSCESet(countData = counts,
+        phenoData = new("AnnotatedDataFrame", data = Biobase:::pData(sim)),
+        featureData = new("AnnotatedDataFrame", data = Biobase:::fData(sim)))
+    
+    return(sce)
+}
+
+sce_pbs <- getSCE(ge_pbs$expression[pwyContactInhibition@genes,])
+scater::plotPCA(sce_pbs, exprs_values = 'counts')
+
+png(file='fig6d.png')
+heatmap.2(ge_100ug$expression, col=greenred, scale='row', trace='none',
+    hclust=function(x) hclust(x,method='complete'),
+    distfun=function(x) as.dist((1-cor(t(x)))/2), Colv=F, dendrogram='row')
 
 #png(file='fig6d_growth.png')
 #heatmap.2(ge_100ug_bulk$expression[pwyGrowth@genes,], col=greenred, scale='row',
@@ -27,5 +46,5 @@ data(SamplePathways)
 
 #png(file='fig6d_contactInhibition.png')
 #heatmap.2(ge_100ug_bulk$expression[pwyContactInhibition@genes,], col=greenred, scale='row',
-#    trace='none', hclust=function(x) hclust(x,method='complete'),
-#    distfun=function(x) as.dist((1-cor(t(x)))/2), Colv=F, dendrogram='row')
+    #trace='none', hclust=function(x) hclust(x,method='complete'),
+    #distfun=function(x) as.dist((1-cor(t(x)))/2), Colv=F, dendrogram='row')
