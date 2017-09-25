@@ -5,9 +5,9 @@ library('reshape2')
 library(methods)
 load("Figure_5_cleaned.RData")
 
-fig <- ggplot(subset(fig5data, density == 0.05 & cycleLength %in% c(12,18,24)), aes(x=time)) + 
-    geom_point(aes(y=cellTypeBFreq)) 
-ggsave(filename='fig5a.png', plot=fig)
+#$fig <- ggplot(subset(fig5data, density == 0.05 & cycleLength %in% c(12,18,24)), aes(x=time)) + 
+    #geom_point(aes(y=cellTypeBFreq)) 
+#ggsave(filename='fig5a.png', plot=fig)
 
 #mat <- matrix(nrow=length(cellTypeBInitFreq), ncol=length(cellTypeBCycleLength))
 #for (data in fig5data)

@@ -35,10 +35,12 @@ ggplot(subset(pdxData, model=='409_PDX_F2'), aes(x=day, color=treatment)) +
     geom_line(aes(y=tumorVol, linetype=as.character(mouseID)))
 
 ggplot(subset(pdxData, treatment=='PBS'), aes(x=day, color=model)) + 
-    geom_line(aes(y=tumorVol, linetype=as.character(mouseID)))
+    geom_line(aes(y=tumorVol, linetype=as.character(mouseID))) +
+    ggtitle('PBS Mouse Data')
 
 ggplot(subset(pdxData, treatment=='CET'), aes(x=day, color=model)) + 
-  geom_line(aes(y=tumorVol, linetype=as.character(mouseID)))
+  geom_line(aes(y=tumorVol, linetype=as.character(mouseID))) +
+    ggtitle('CET Mouse Data')
 
 ggplot(pdxData, aes(x=day, color=model)) + 
     geom_line(aes(y=tumorVol, linetype=as.character(mouseID)))
