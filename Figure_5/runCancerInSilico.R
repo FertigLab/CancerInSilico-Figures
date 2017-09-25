@@ -28,8 +28,8 @@ delta <- 0.2
 
 #### Set Custom Values ####
 
-sd <- c(0.1, 0.5, 1, 2, 4, 6, 8, 10)
-freqA <- seq(0, 1.0, 0.1)
+sd <- c(0.1, 0.5, 1, 3, 6, 9)
+freqA <- c(0.1, 0.25, 0.4, 0.55, 0.7, 0.85)
 
 typeDEF <- lapply(sd, function(stddev) new('CellType', name='DEF', minCycle=24-2*stddev,
     cycleLength=function() max(24-2*stddev, rnorm(1,24,stddev))))
@@ -39,6 +39,9 @@ typeB <- lapply(c(38,34,30,26), function(mean) new('CellType', name='B', minCycl
 	cycleLength=function() max(mean-2, rnorm(1,mean,1))))
 
 total <- length(sd) + length(typeA) * length(freqA)
+
+arrayNum <- (arrayNum - 1) %% total + 1
+repit <- floor((arrayNum - 1) / total) + 1
 
 if (arrayNum <= length(sd))
 {
@@ -63,7 +66,7 @@ cellTypes <- c(cellTypeA, cellTypeB)
 
 if (!is.na(returnSize)) {
 
-    cat(as.numeric(total))
+    cat(as.numeric(total * 10))
 
 } else {
 
