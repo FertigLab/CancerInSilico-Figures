@@ -5,16 +5,6 @@ library(methods)
 load('Figure_6_cleaned.RData') #ge_pbs, ge_10ug, ge_100ug, pwyActivity
 data(SamplePathways)
 
-data(SamplePathways)
-
-refCountData <- round(2 ^ referenceGeneExpression - 1)
-
-pwyGrowth <- calibratePathway(pwyGrowth, refCountData)
-pwyMitosis <- calibratePathway(pwyMitosis, refCountData)
-pwySPhase <- calibratePathway(pwySPhase, refCountData)
-pwyContactInhibition <- calibratePathway(pwyContactInhibition, refCountData)
-allPwys <- c(pwyGrowth, pwyMitosis, pwySPhase, pwyContactInhibition)
-
 #png(file='fig6d.png')
 #heatmap.2(ge_100ug_bulk$expression, col=greenred, scale='row', trace='none',
 #    hclust=function(x) hclust(x,method='complete'),

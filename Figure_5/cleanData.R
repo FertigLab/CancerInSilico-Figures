@@ -1,48 +1,41 @@
 library(CancerInSilico)
 
 ## read data, extract neccesary info
-allFiles <- list.files(path='../Data/Figure_5', full.names = TRUE,
+allFiles <- list.files(path='~/data/figure_data/Figure_5', full.names = TRUE,
     recursive = TRUE, pattern = "*.RData")
 
-## extract cell type proportion
-getCellTypeBFreq <- function(time, mod)
+getMean <- function(cellType)
 {
-    cellTypes <- sapply(1:getNumberOfCells(mod, time),
-        getCellType, model=mod, time=time)
-    freq <- sum(cellTypes==2) / length(cellTypes)
-} 
+    round(mean(sapply(1:1e4, function(dummy) cellType@cycleLength())))
+}
 
-## setup progress bar
+getSD <- function(cellType)
+{
+    (getMean(cellType) - cellType@minCycle) / 2
+}
+
 fileNo <- 1
 pb <- txtProgressBar(min=1, max=length(allFiles), style=3)
-
-## record cell info
-cellTypeBFreq <- c()
-cycleLength <- c()
-density <- c()
-time <- c()
+fig5Data <- list()
 for (file in allFiles)
 {
     load(file)
+    nCells <- sapply(0:output@runTime, getNumberOfCells, model=output)
 
-    t <- 0:output@runTime
-
-    time <- c(time, t)
-    density <- c(density, rep(output@density, length(t)))
-    cycleLength <- c(cycleLength, rep(output@cellTypes[[2]]@minCycle, length(t)))
-    cellTypeBFreq <- c(cellTypeBFreq, sapply(t, getCellTypeBFreq, mod=output))
-
+    fig5Data[[file]] <- list(
+        'numCells'    = nCells,
+        'meanA' = getMean(output@cellTypes[[1]]),
+        'meanB' = getMean(output@cellTypes[[2]]),
+        'sdA' = getSD(output@cellTypes[[1]]),
+        'sdB' = getSD(output@cellTypes[[2]]),
+        'freqA' = output@cellTypeInitFreq[1]
+    )
+    
     fileNo <- fileNo + 1
     setTxtProgressBar(pb, fileNo)
 }
-
-## store cell info in data frame
-fig5data <- data.frame(cellTypeBFreq = cellTypeBFreq,
-    cycleLength = cycleLength, density = density, time = time)
-
-## close progress bar and save data
 close(pb)
 print('saving...')
-save(fig5data, file='Figure_5_cleaned.RData')
+save(fig5Data, file='Figure_5_cleaned.RData')
 
 
