@@ -5,33 +5,21 @@ library('reshape2')
 library(methods)
 load("Figure_5_cleaned.RData")
 
-singleLow <- fig5Data[sapply(fig5Data,
-    function(mod) mod$freqA==1 & mod$sdA < 0.2)]
-
-singleHigh <- fig5Data[sapply(fig5Data,
-    function(mod) mod$freqA==1 & mod$sdA > 8)]
-
-doubleFar <- fig5Data[sapply(fig5Data,
-    function(mod) mod$freqA!=1 & mod$meanA < 12)]
-
-doubleNear <- fig5Data[sapply(fig5Data,
-    function(mod) mod$freqA!=1 & mod$meanA > 20)]
+twoTypesRun <- fig5data[sapply(fig5data, function(mod) mod$numTypes==2)]
+threeTypesRun <- fig5data[sapply(fig5data, function(mod) mod$numTypes==3)]
+fiveTypesRun <- fig5data[sapply(fig5data, function(mod) mod$numTypes==5)]
 
 png('fig5a1.png')
 plot(NULL, xlim=c(0,168), ylim=c(0,1000))
-sapply(singleLow, function(mod) lines(1:length(mod$numCells), mod$numCells))
+sapply(twoTypesRun, function(mod) lines(1:length(mod$numCells), mod$numCells))
 
 png('fig5a2.png')
 plot(NULL, xlim=c(0,168), ylim=c(0,1000))
-sapply(singleHigh, function(mod) lines(1:length(mod$numCells), mod$numCells))
+sapply(threeTypesRun, function(mod) lines(1:length(mod$numCells), mod$numCells))
 
 png('fig5a3.png')
 plot(NULL, xlim=c(0,168), ylim=c(0,1000))
-sapply(doubleFar, function(mod) lines(1:length(mod$numCells), mod$numCells))
-
-png('fig5a4.png')
-plot(NULL, xlim=c(0,168), ylim=c(0,1000))
-sapply(doubleNear, function(mod) lines(1:length(mod$numCells), mod$numCells))
+sapply(fiveTypesRun, function(mod) lines(1:length(mod$numCells), mod$numCells))
 
 #fig <- ggplot(subset(fig5data, density == 0.05 & cycleLength %in% c(12,18,24)), aes(x=time)) + 
     #geom_point(aes(y=cellTypeBFreq)) 

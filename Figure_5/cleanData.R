@@ -24,11 +24,8 @@ for (file in allFiles)
 
     fig5Data[[file]] <- list(
         'numCells'    = nCells,
-        'meanA' = getMean(output@cellTypes[[1]]),
-        'meanB' = getMean(output@cellTypes[[2]]),
-        'sdA' = getSD(output@cellTypes[[1]]),
-        'sdB' = getSD(output@cellTypes[[2]]),
-        'freqA' = output@cellTypeInitFreq[1]
+        'numTypes'    = length(output@cellTypes),
+        'typeFreq' = output@cellTypeInitFreq
     )
     
     fileNo <- fileNo + 1
