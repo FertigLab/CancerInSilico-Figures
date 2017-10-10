@@ -28,44 +28,42 @@ delta <- 0.2
 
 #### Set Custom Values ####
 
-sd <- c(0.1, 0.5, 1, 3, 6, 9)
-freqA <- c(0.1, 0.25, 0.4, 0.55, 0.7, 0.85)
+type1 <- new('CellType', name='A', minCycle=10-2,
+    cycleLength=function() max(10-2, rnorm(1,10,1)))
+type2 <- new('CellType', name='B', minCycle=16-2,
+    cycleLength=function() max(16-2, rnorm(1,16,1)))
+type3 <- new('CellType', name='C', minCycle=22-2,
+    cycleLength=function() max(22-2, rnorm(1,22,1)))
+type4 <- new('CellType', name='D', minCycle=28-2,
+    cycleLength=function() max(28-2, rnorm(1,28,1)))
+type5 <- new('CellType', name='E', minCycle=34-2,
+    cycleLength=function() max(34-2, rnorm(1,34,1)))
 
-typeDEF <- lapply(sd, function(stddev) new('CellType', name='DEF', minCycle=24-2*stddev,
-    cycleLength=function() max(24-2*stddev, rnorm(1,24,stddev))))
-typeA <- lapply(c(10,14,18,22), function(mean) new('CellType', name='A', minCycle=mean-2,
-    cycleLength=function() max(mean-2, rnorm(1,mean,1))))
-typeB <- lapply(c(38,34,30,26), function(mean) new('CellType', name='B', minCycle=mean-2,
-	cycleLength=function() max(mean-2, rnorm(1,mean,1))))
+numReplicates <- 300
+totalRuns <- 3 * numReplicates
 
-total <- length(sd) + length(typeA) * length(freqA)
-
-index <- (arrayNum - 1) %% total + 1
-
-if (index <= length(sd))
+if (arrayNum <= numReplicates)
 {
-    cellTypeA <- typeDEF[[index]]
-    cellTypeB <- typeDEF[[index]]
-    cellTypeInitFreq <- c(1,0)
+    cellTypes <- c(type1, type5)
+    cellTypeInitFreq <- c(rmultinom(1, 100, rep(1/2, 2))) / 100
+
+} else if (arrayNum <= 2 * numReplicates) {
+
+    cellTypes <- c(type1, type3, type5)
+    cellTypeInitFreq <- c(rmultinom(1, 100, rep(1/3, 3))) / 100
 
 } else {
 
-    n <- index - length(sd) - 1
-    i1 <- (n %% length(typeA)) + 1
-    i2 <- floor(n / length(typeA)) + 1
+    cellTypes <- c(type1, type2, type3, type4, type5)
+    cellTypeInitFreq <- c(rmultinom(1, 100, rep(1/5, 5))) / 100
 
-    cellTypeA <- typeA[[i1]]
-    cellTypeB <- typeB[[i1]]
-    cellTypeInitFreq <- c(freqA[i2], 1 - freqA[i2])
 }
-
-cellTypes <- c(cellTypeA, cellTypeB)
 
 #### Run Simulation ####
 
 if (!is.na(returnSize)) {
 
-    cat(as.numeric(total * 10))
+    cat(as.numeric(totalRuns))
 
 } else {
 
