@@ -5,21 +5,24 @@ library('reshape2')
 library(methods)
 load("Figure_5_cleaned.RData")
 
-twoTypesRun <- fig5data[sapply(fig5data, function(mod) mod$numTypes==2)]
-threeTypesRun <- fig5data[sapply(fig5data, function(mod) mod$numTypes==3)]
-fiveTypesRun <- fig5data[sapply(fig5data, function(mod) mod$numTypes==5)]
+twoTypesRun <- fig5Data[sapply(fig5Data, function(mod) mod$numTypes==2)]
+threeTypesRun <- fig5Data[sapply(fig5Data, function(mod) mod$numTypes==3)]
+fiveTypesRun <- fig5Data[sapply(fig5Data, function(mod) mod$numTypes==5)]
 
 png('fig5a1.png')
 plot(NULL, xlim=c(0,168), ylim=c(0,1000))
-sapply(twoTypesRun, function(mod) lines(1:length(mod$numCells), mod$numCells))
+eat <- sapply(twoTypesRun, function(mod) lines(1:length(mod$numCells), mod$numCells))
+print(sd(sapply(twoTypesRun, function(mod) mod$numCells[50])))
 
 png('fig5a2.png')
 plot(NULL, xlim=c(0,168), ylim=c(0,1000))
-sapply(threeTypesRun, function(mod) lines(1:length(mod$numCells), mod$numCells))
+eat <- sapply(threeTypesRun, function(mod) lines(1:length(mod$numCells), mod$numCells))
+print(sd(sapply(threeTypesRun, function(mod) mod$numCells[50])))
 
 png('fig5a3.png')
 plot(NULL, xlim=c(0,168), ylim=c(0,1000))
-sapply(fiveTypesRun, function(mod) lines(1:length(mod$numCells), mod$numCells))
+eat <- sapply(fiveTypesRun, function(mod) lines(1:length(mod$numCells), mod$numCells))
+print(sd(sapply(fiveTypesRun, function(mod) mod$numCells[50])))
 
 #fig <- ggplot(subset(fig5data, density == 0.05 & cycleLength %in% c(12,18,24)), aes(x=time)) + 
     #geom_point(aes(y=cellTypeBFreq)) 

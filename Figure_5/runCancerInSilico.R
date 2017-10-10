@@ -28,34 +28,41 @@ delta <- 0.2
 
 #### Set Custom Values ####
 
-type1 <- new('CellType', name='A', minCycle=10-2,
-    cycleLength=function() max(10-2, rnorm(1,10,1)))
+type1 <- new('CellType', name='A', minCycle=12-2,
+    cycleLength=function() max(12-2, rnorm(1,12,1)))
+
 type2 <- new('CellType', name='B', minCycle=16-2,
     cycleLength=function() max(16-2, rnorm(1,16,1)))
-type3 <- new('CellType', name='C', minCycle=22-2,
-    cycleLength=function() max(22-2, rnorm(1,22,1)))
+
+type3 <- new('CellType', name='C', minCycle=20-2,
+    cycleLength=function() max(20-2, rnorm(1,20,1)))
+
 type4 <- new('CellType', name='D', minCycle=28-2,
     cycleLength=function() max(28-2, rnorm(1,28,1)))
-type5 <- new('CellType', name='E', minCycle=34-2,
-    cycleLength=function() max(34-2, rnorm(1,34,1)))
 
-numReplicates <- 300
+type5 <- new('CellType', name='E', minCycle=32-2,
+    cycleLength=function() max(32-2, rnorm(1,32,1)))
+
+type6 <- new('CellType', name='E', minCycle=36-2,
+    cycleLength=function() max(36-2, rnorm(1,36,1)))
+
+numReplicates <- 100
 totalRuns <- 3 * numReplicates
 
 if (arrayNum <= numReplicates)
 {
-    cellTypes <- c(type1, type5)
+    cellTypes <- c(type1, type6)
     cellTypeInitFreq <- c(rmultinom(1, 100, rep(1/2, 2))) / 100
 
 } else if (arrayNum <= 2 * numReplicates) {
 
-    cellTypes <- c(type1, type3, type5)
-    cellTypeInitFreq <- c(rmultinom(1, 100, rep(1/3, 3))) / 100
+    cellTypes <- c(type1, type2, type5, type6)
+    cellTypeInitFreq <- c(rmultinom(1, 100, rep(1/4, 4))) / 100
 
 } else {
 
-    cellTypes <- c(type1, type2, type3, type4, type5)
-    cellTypeInitFreq <- c(rmultinom(1, 100, rep(1/5, 5))) / 100
+    cellTypes <- c(type1, type2, type3, type4, type5, type6)
+    cellTypeInitFreq <- c(rmultinom(1, 100, rep(1/6, 6))) / 100
 
 }
 
