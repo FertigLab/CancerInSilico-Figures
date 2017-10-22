@@ -28,6 +28,17 @@ delta <- 0.2
 
 #### Set Custom Values ####
 
+#Main source of variation is initial proportion
+#Three parameters: initial proportion, number of cell types, difference in cell types
+#A – show variance with one type is small
+#B – show variance is large with two cell types and varying prop
+#C – show adding cell types does not increase this variance
+#D – show increasing variance with increase variance in prop
+#Each fig has 3 components: total over time, prop dist, total dist at 48 hours
+
+singleType <- new('CellType', name='DEFAULT', minCycle=24-20,
+    cycleLength=function() max(24-20, rnorm(1,24,10)))
+
 type1 <- new('CellType', name='A', minCycle=12-2,
     cycleLength=function() max(12-2, rnorm(1,12,1)))
 
@@ -46,25 +57,32 @@ type5 <- new('CellType', name='E', minCycle=32-2,
 type6 <- new('CellType', name='E', minCycle=36-2,
     cycleLength=function() max(36-2, rnorm(1,36,1)))
 
-numReplicates <- 100
-totalRuns <- 3 * numReplicates
+numReplicates <- 200
+totalRuns <- 4 * numReplicates
 
 if (arrayNum <= numReplicates)
 {
+    cellTypes <- c(singleType)
+    cellTypeInitFreq <- c(1)
+
+} else if (arrayNum <= 4 * numReplicates) {
+
     cellTypes <- c(type1, type6)
-    cellTypeInitFreq <- c(rmultinom(1, 100, rep(1/2, 2))) / 100
-
-} else if (arrayNum <= 2 * numReplicates) {
-
-    cellTypes <- c(type1, type2, type5, type6)
-    cellTypeInitFreq <- c(rmultinom(1, 100, rep(1/4, 4))) / 100
-
-} else {
-
-    cellTypes <- c(type1, type2, type3, type4, type5, type6)
-    cellTypeInitFreq <- c(rmultinom(1, 100, rep(1/6, 6))) / 100
-
+    aProp <- runif(1,0,1)
+    cellTypeInitFreq <- c(aProp, 1 - aProp)
 }
+
+#} else if (arrayNum <= 5 * numReplicates) {
+#
+#    cellTypes <- c(type1, type2, type5, type6)
+#    cellTypeInitFreq <- c(rmultinom(1, 100, rep(1/4, 4))) / 100
+#
+#} else {
+#
+#    cellTypes <- c(type1, type2, type3, type4, type5, type6)
+#    cellTypeInitFreq <- c(rmultinom(1, 100, rep(1/6, 6))) / 100
+#
+#}
 
 #### Run Simulation ####
 
