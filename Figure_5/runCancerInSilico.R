@@ -65,7 +65,7 @@ if (arrayNum <= numReplicates)
     cellTypes <- c(singleType)
     cellTypeInitFreq <- c(1)
 
-} else if (arrayNum <= 4 * numReplicates) {
+} else if (arrayNum <= totalRuns) {
 
     cellTypes <- c(type1, type6)
     aProp <- runif(1,0,1)

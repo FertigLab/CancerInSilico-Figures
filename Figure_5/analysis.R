@@ -5,72 +5,88 @@ library('reshape2')
 library(methods)
 load("Figure_5_cleaned.RData")
 
-error.bar <- function(x, y, upper, lower=upper, length=0.1,...){
-if(length(x) != length(y) | length(y) !=length(lower) | length(lower) != length(upper))
-stop("vectors must be same length")
-arrows(x,y+upper, x, y-lower, angle=90, code=3, length=length, ...)
+error.bar <- function(x, y, upper, lower=upper, length=0.1,...)
+{
+    if (length(x) != length(y) | length(y) !=length(lower) | length(lower) != length(upper))
+        stop("vectors must be same length")
+    arrows(x,y+upper, x, y-lower, angle=90, code=3, length=length, ...)
 }
 
+singleTypeRun <- fig5Data[sapply(fig5Data, function(mod) mod$numTypes==1)]
 twoTypesRun <- fig5Data[sapply(fig5Data, function(mod) mod$numTypes==2)]
-fourTypesRun <- fig5Data[sapply(fig5Data, function(mod) mod$numTypes==4)]
-sixTypesRun <- fig5Data[sapply(fig5Data, function(mod) mod$numTypes==6)]
+#fourTypesRun <- fig5Data[sapply(fig5Data, function(mod) mod$numTypes==4)]
+#sixTypesRun <- fig5Data[sapply(fig5Data, function(mod) mod$numTypes==6)]
+
+# single type
 
 # two types
-png('fig5_2_total.png')
+lowVarianceRuns <- twoTypesRun[sapply(twoTypesRun, function(mod)
+    mod$typeFreq[1] > 0.4 & mod$typeFreq[1] < 0.6)]
+medVarianceRuns <- twoTypesRun[sapply(twoTypesRun, function(mod)
+    mod$typeFreq[1] > 0.2 & mod$typeFreq[1] < 0.7)]
+highVarianceRuns <- twoTypesRun[sapply(twoTypesRun, function(mod)
+    mod$typeFreq[1] > 0.3 & mod$typeFreq[1] < 0.8)]
+
+png('fig5_low_total.png')
 plot(NULL, xlim=c(0,168), ylim=c(0,1000), xlab="time (hrs)",
     ylab="number of cells", main="two cell types")
-eat <- sapply(twoTypesRun, function(mod) lines(1:length(mod$numCells), mod$numCells))
+eat <- sapply(lowVarianceRuns, function(mod) lines(1:length(mod$numCells), mod$numCells))
 
-png('fig5_2_freq.png')
-freqMat <- unname(sapply(twoTypesRun, function(mod) mod$typeFreq))
-meanVec <- apply(freqMat, 1, mean)
-sdVec <- apply(freqMat, 1, sd)
-barx <- barplot(meanVec, ylim=c(0,0.75), axis.lty=1, xlab="Cell Type",
-    ylab="Initial Frequency", main="Two cell types - initial proportion")
-error.bar(barx, meanVec, 1.96 * sdVec / sqrt(length(sdVec)))
-
-png('fig5_2_stddev.png')
-plot(density(sapply(twoTypesRun, function(mod) mod$numCells[48])), 
-    main="distribution of cell population at 48 hours - 2 types",
-    xlab="number of cells", ylab="density")
+#png('fig5_2_total.png')
+#plot(NULL, xlim=c(0,168), ylim=c(0,1000), xlab="time (hrs)",
+#    ylab="number of cells", main="two cell types")
+#eat <- sapply(twoTypesRun, function(mod) lines(1:length(mod$numCells), mod$numCells))
+#
+#png('fig5_2_freq.png')
+#freqMat <- unname(sapply(twoTypesRun, function(mod) mod$typeFreq))
+#meanVec <- apply(freqMat, 1, mean)
+#sdVec <- apply(freqMat, 1, sd)
+#barx <- barplot(meanVec, ylim=c(0,0.75), axis.lty=1, xlab="Cell Type",
+#    ylab="Initial Frequency", main="Two cell types - initial proportion")
+#error.bar(barx, meanVec, 1.96 * sdVec / sqrt(length(sdVec)))
+#
+#png('fig5_2_stddev.png')
+#plot(density(sapply(twoTypesRun, function(mod) mod$numCells[48])), 
+#    main="distribution of cell population at 48 hours - 2 types",
+#    xlab="number of cells", ylab="density")
 
 # 4 types
-png('fig5_4_total.png')
-plot(NULL, xlim=c(0,168), ylim=c(0,1000), xlab="time (hrs)",
-    ylab="number of cells", main="four cell types")
-eat <- sapply(fourTypesRun, function(mod) lines(1:length(mod$numCells), mod$numCells))
-
-png('fig5_4_freq.png')
-freqMat <- unname(sapply(fourTypesRun, function(mod) mod$typeFreq))
-meanVec <- apply(freqMat, 1, mean)
-sdVec <- apply(freqMat, 1, sd)
-barx <- barplot(meanVec, ylim=c(0,0.75), axis.lty=1, xlab="Cell Type",
-    ylab="Initial Frequency", main="Four cell types - initial proportion")
-error.bar(barx, meanVec, 1.96 * sdVec / sqrt(length(sdVec)))
-
-png('fig5_4_stddev.png')
-plot(density(sapply(fourTypesRun, function(mod) mod$numCells[48])), 
-    main="distribution of cell population at 48 hours - 4 types",
-    xlab="number of cells", ylab="density")
-
-## 6 types
-png('fig5_6_total.png')
-plot(NULL, xlim=c(0,168), ylim=c(0,1000), xlab="time (hrs)",
-    ylab="number of cells", main="six cell types")
-eat <- sapply(sixTypesRun, function(mod) lines(1:length(mod$numCells), mod$numCells))
-
-png('fig5_6_freq.png')
-freqMat <- unname(sapply(sixTypesRun, function(mod) mod$typeFreq))
-meanVec <- apply(freqMat, 1, mean)
-sdVec <- apply(freqMat, 1, sd)
-barx <- barplot(meanVec, ylim=c(0,0.75), axis.lty=1, xlab="Cell Type",
-    ylab="Initial Frequency", main="Six cell types - initial proportion")
-error.bar(barx, meanVec, 1.96 * sdVec / sqrt(length(sdVec)))
-
-png('fig5_6_stddev.png')
-plot(density(sapply(sixTypesRun, function(mod) mod$numCells[48])), 
-    main="distribution of cell population at 48 hours - 6 types",
-    xlab="number of cells", ylab="density")
+#png('fig5_4_total.png')
+#plot(NULL, xlim=c(0,168), ylim=c(0,1000), xlab="time (hrs)",
+#    ylab="number of cells", main="four cell types")
+#eat <- sapply(fourTypesRun, function(mod) lines(1:length(mod$numCells), mod$numCells))
+#
+#png('fig5_4_freq.png')
+#freqMat <- unname(sapply(fourTypesRun, function(mod) mod$typeFreq))
+#meanVec <- apply(freqMat, 1, mean)
+#sdVec <- apply(freqMat, 1, sd)
+#barx <- barplot(meanVec, ylim=c(0,0.75), axis.lty=1, xlab="Cell Type",
+#    ylab="Initial Frequency", main="Four cell types - initial proportion")
+#error.bar(barx, meanVec, 1.96 * sdVec / sqrt(length(sdVec)))
+#
+#png('fig5_4_stddev.png')
+#plot(density(sapply(fourTypesRun, function(mod) mod$numCells[48])), 
+#    main="distribution of cell population at 48 hours - 4 types",
+#    xlab="number of cells", ylab="density")
+#
+### 6 types
+#png('fig5_6_total.png')
+#plot(NULL, xlim=c(0,168), ylim=c(0,1000), xlab="time (hrs)",
+#    ylab="number of cells", main="six cell types")
+#eat <- sapply(sixTypesRun, function(mod) lines(1:length(mod$numCells), mod$numCells))
+#
+#png('fig5_6_freq.png')
+#freqMat <- unname(sapply(sixTypesRun, function(mod) mod$typeFreq))
+#meanVec <- apply(freqMat, 1, mean)
+#sdVec <- apply(freqMat, 1, sd)
+#barx <- barplot(meanVec, ylim=c(0,0.75), axis.lty=1, xlab="Cell Type",
+#    ylab="Initial Frequency", main="Six cell types - initial proportion")
+#error.bar(barx, meanVec, 1.96 * sdVec / sqrt(length(sdVec)))
+#
+#png('fig5_6_stddev.png')
+#plot(density(sapply(sixTypesRun, function(mod) mod$numCells[48])), 
+#    main="distribution of cell population at 48 hours - 6 types",
+#    xlab="number of cells", ylab="density")
 
 
 #png('fig5a2.png')
