@@ -23,14 +23,66 @@ twoTypesRun <- fig5Data[sapply(fig5Data, function(mod) mod$numTypes==2)]
 lowVarianceRuns <- twoTypesRun[sapply(twoTypesRun, function(mod)
     mod$typeFreq[1] > 0.4 & mod$typeFreq[1] < 0.6)]
 medVarianceRuns <- twoTypesRun[sapply(twoTypesRun, function(mod)
-    mod$typeFreq[1] > 0.2 & mod$typeFreq[1] < 0.7)]
+    mod$typeFreq[1] > 0.2 & mod$typeFreq[1] < 0.8)]
 highVarianceRuns <- twoTypesRun[sapply(twoTypesRun, function(mod)
-    mod$typeFreq[1] > 0.3 & mod$typeFreq[1] < 0.8)]
+    mod$typeFreq[1] > 0.0 & mod$typeFreq[1] < 1.0)]
 
+# totals
 png('fig5_low_total.png')
 plot(NULL, xlim=c(0,168), ylim=c(0,1000), xlab="time (hrs)",
-    ylab="number of cells", main="two cell types")
+    ylab="number of cells", main="Population Size Over Time")
 eat <- sapply(lowVarianceRuns, function(mod) lines(1:length(mod$numCells), mod$numCells))
+
+png('fig5_med_total.png')
+plot(NULL, xlim=c(0,168), ylim=c(0,1000), xlab="time (hrs)",
+    ylab="number of cells", main="Population Size Over Time")
+eat <- sapply(medVarianceRuns, function(mod) lines(1:length(mod$numCells), mod$numCells))
+
+png('fig5_high_total.png')
+plot(NULL, xlim=c(0,168), ylim=c(0,1000), xlab="time (hrs)",
+    ylab="number of cells", main="Population Size Over Time")
+eat <- sapply(highVarianceRuns, function(mod) lines(1:length(mod$numCells), mod$numCells))
+
+# init freq
+png('fig5_low_freq.png')
+freqMat <- unname(sapply(lowVarianceRuns, function(mod) mod$typeFreq))
+meanVec <- apply(freqMat, 1, mean)
+sdVec <- apply(freqMat, 1, sd)
+barx <- barplot(meanVec, ylim=c(0,1.0), axis.lty=1, xlab="Cell Type",
+    ylab="Initial Frequency", main="Variance of Initial Cell Type Proportion")
+error.bar(barx, meanVec, 1.96 * sdVec / sqrt(length(sdVec)))
+
+png('fig5_med_freq.png')
+freqMat <- unname(sapply(medVarianceRuns, function(mod) mod$typeFreq))
+meanVec <- apply(freqMat, 1, mean)
+sdVec <- apply(freqMat, 1, sd)
+barx <- barplot(meanVec, ylim=c(0,1.0), axis.lty=1, xlab="Cell Type",
+    ylab="Initial Frequency", main="Variance of Initial Cell Type Proportion")
+error.bar(barx, meanVec, 1.96 * sdVec / sqrt(length(sdVec)))
+
+png('fig5_high_freq.png')
+freqMat <- unname(sapply(highVarianceRuns, function(mod) mod$typeFreq))
+meanVec <- apply(freqMat, 1, mean)
+sdVec <- apply(freqMat, 1, sd)
+barx <- barplot(meanVec, ylim=c(0,1.0), axis.lty=1, xlab="Cell Type",
+    ylab="Initial Frequency", main="Variance of Initial Cell Type Proportion")
+error.bar(barx, meanVec, 1.96 * sdVec / sqrt(length(sdVec)))
+
+# distribution
+#png('fig5_low_dist.png')
+#plot(density(sapply(lowVarianceRuns, function(mod) mod$numCells[48])), 
+#    main="distribution of cell population at 48 hours - 2 types",
+#    xlab="number of cells", ylab="density")
+#
+#png('fig5_med_dist.png')
+#plot(density(sapply(medVarianceRuns, function(mod) mod$numCells[48])), 
+#    main="distribution of cell population at 48 hours - 2 types",
+#    xlab="number of cells", ylab="density")
+#
+#png('fig5_high_dist.png')
+#plot(density(sapply(highVarianceRuns, function(mod) mod$numCells[48])), 
+#    main="distribution of cell population at 48 hours - 2 types",
+#    xlab="number of cells", ylab="density")
 
 #png('fig5_2_total.png')
 #plot(NULL, xlim=c(0,168), ylim=c(0,1000), xlab="time (hrs)",
