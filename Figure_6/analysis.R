@@ -21,13 +21,14 @@ getSCE <- function(counts)
     return(sce)
 }
 
-sce_pbs <- getSCE(ge_pbs$expression[pwyContactInhibition@genes,])
-scater::plotPCA(sce_pbs, exprs_values = 'counts')
+sce <- getSCE(ge$expression)
+png(file='fig6.png')
+scater::plotPCA(sce, exprs_values = 'counts')
 
-png(file='fig6d.png')
-heatmap.2(ge_100ug$expression, col=greenred, scale='row', trace='none',
-    hclust=function(x) hclust(x,method='complete'),
-    distfun=function(x) as.dist((1-cor(t(x)))/2), Colv=F, dendrogram='row')
+
+#heatmap.2(ge_100ug$expression, col=greenred, scale='row', trace='none',
+    #hclust=function(x) hclust(x,method='complete'),
+    #distfun=function(x) as.dist((1-cor(t(x)))/2), Colv=F, dendrogram='row')
 
 #png(file='fig6d_growth.png')
 #heatmap.2(ge_100ug_bulk$expression[pwyGrowth@genes,], col=greenred, scale='row',
