@@ -90,12 +90,28 @@ cellType <- c()
 nCells <- getNumberOfCells(fig6Data[[1]], 144)
 cellPhase <- matrix(nrow=nCells, ncol=145)
 
+SPhaseExp <- function(model, cell, time)
+{
+    window <- c(max(time - 1, 0), min(time + 1, model@runTime))
+
+    r1 <- getRadius(model, window[1], cell)
+    r2 <- getRadius(model, window[2], cell)
+
+    type <- model@cellTypes[[getCellType(model, time, cell)]]
+
+    return(ifelse(r1 < sqrt(1.5 * type@size) & r2 > sqrt(1.5 * type@size),
+        1, 0))
+}
+
 for (c in 1:nCells)
 {
     cellType[c] <- getCellType(fig6Data[[1]], 144, c)
     for (t in 0:144)
     {
-        cellPhase[c,t+1] <- getCellPhase(fig6Data[[1]], t, c)
+        if (SPhaseExp(fig6Data[[1]], c, t)
+            cellPhase[c,t+1] <- 'S'
+        else
+            cellPhase[c,t+1] <- getCellPhase(fig6Data[[1]], t, c)
     }
 }
 
