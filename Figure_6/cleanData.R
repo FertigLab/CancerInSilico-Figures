@@ -88,7 +88,7 @@ pwyActivity <- data.frame(hour=hours,
 # get cell phase/type info
 cellType <- c()
 nCells <- getNumberOfCells(fig6Data[[1]], 144)
-cellPhase <- matrix(nrow=nCells, ncol=145)
+cellPhase <- matrix('NoCell', nrow=nCells, ncol=145)
 
 SPhaseExp <- function(model, cell, time)
 {
@@ -104,9 +104,14 @@ SPhaseExp <- function(model, cell, time)
 for (c in 1:nCells)
 {
     cellType[c] <- getCellType(fig6Data[[1]], 144, c)
-    for (t in 0:144)
+}
+
+for (t in 0:144)
+{
+    nCells <- getNumberOfCells(fig6Data[[1]], t)
+
+    for (c in 1:nCells)
     {
-	print(SPhaseExp(fig6Data[[1]], c, t))
         if (SPhaseExp(fig6Data[[1]], c, t)) {
             cellPhase[c,t+1] <- 'S'
 	} else {
