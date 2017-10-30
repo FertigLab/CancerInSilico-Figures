@@ -110,9 +110,9 @@ for (t in 0:168)
     {
         if (SPhaseExp(fig6Data[[1]], c, t)) {
             cellPhase[c,t+1] <- 'S'
-	} else {
+        } else {
             cellPhase[c,t+1] <- getCellPhase(fig6Data[[1]], t, c)
-	}
+        }
     }
 }
 

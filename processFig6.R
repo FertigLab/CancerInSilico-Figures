@@ -9,9 +9,6 @@ fig4_100ug_microarray <- ge_100ug$expression
 fig6_two_cell_types_single_cell_RNAseq <- ge$expression
 fig6_two_cell_types_bulk_RNAseq <- ge_bulk$expression
 
-colnames(ge$expression)[4128]
-
-
 getType <- function(str)
 {
   pos <- regexpr('_', str)[1]
