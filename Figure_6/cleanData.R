@@ -75,8 +75,7 @@ movAvg <- function(data)
     return(avg)
 }
 
-pwyActivity <- data.frame(hour=hours,
-    cellTypeA = ge_bulk$pathways[[1]],
+pwyActivity <- data.frame(cellTypeA = ge_bulk$pathways[[1]],
     cellTypeB = ge_bulk$pathways[[2]],
     GtoM      = movAvg(ge_bulk$pathways[[3]]),
     GtoS      = movAvg(ge_bulk$pathways[[4]])
@@ -114,6 +113,7 @@ for (t in 0:168)
 	} else {
             cellPhase[c,t+1] <- getCellPhase(fig6Data[[1]], t, c)
 	}
+    }
 }
 
 save(pwyActivity, ge, ge_bulk, cellPhase, cellType, file='Figure_6_cleaned.RData')
