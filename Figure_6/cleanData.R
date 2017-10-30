@@ -22,9 +22,6 @@ params@nCells <- 96
 params@sampleFreq <- 4
 params@splatParams <- splatter::setParam(params@splatParams, "dropout.present", TRUE)
 
-hours <- seq(0,144,params@sampleFreq)
-colNdx <- 1:length(hours)
-
 data(SamplePathways)
 
 refCountData <- round(2 ^ referenceGeneExpression - 1)
@@ -79,16 +76,16 @@ movAvg <- function(data)
 }
 
 pwyActivity <- data.frame(hour=hours,
-    cellTypeA = ge_bulk$pathways[[1]][colNdx],
-    cellTypeB = ge_bulk$pathways[[2]][colNdx],
-    GtoM      = movAvg(ge_bulk$pathways[[3]][colNdx]),
-    GtoS      = movAvg(ge_bulk$pathways[[4]][colNdx])
+    cellTypeA = ge_bulk$pathways[[1]],
+    cellTypeB = ge_bulk$pathways[[2]],
+    GtoM      = movAvg(ge_bulk$pathways[[3]]),
+    GtoS      = movAvg(ge_bulk$pathways[[4]])
 )
 
 # get cell phase/type info
 cellType <- c()
-nCells <- getNumberOfCells(fig6Data[[1]], 144)
-cellPhase <- matrix('NoCell', nrow=nCells, ncol=145)
+nCells <- getNumberOfCells(fig6Data[[1]], 168)
+cellPhase <- matrix('NoCell', nrow=nCells, ncol=169)
 
 SPhaseExp <- function(model, cell, time)
 {
@@ -103,10 +100,10 @@ SPhaseExp <- function(model, cell, time)
 
 for (c in 1:nCells)
 {
-    cellType[c] <- getCellType(fig6Data[[1]], 144, c)
+    cellType[c] <- getCellType(fig6Data[[1]], 168, c)
 }
 
-for (t in 0:144)
+for (t in 0:168)
 {
     nCells <- getNumberOfCells(fig6Data[[1]], t)
 
@@ -117,7 +114,6 @@ for (t in 0:144)
 	} else {
             cellPhase[c,t+1] <- getCellPhase(fig6Data[[1]], t, c)
 	}
-    }
 }
 
 save(pwyActivity, ge, ge_bulk, cellPhase, cellType, file='Figure_6_cleaned.RData')
