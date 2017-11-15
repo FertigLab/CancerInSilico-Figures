@@ -54,7 +54,9 @@ pwyCellTypeA <- calibratePathway(pwyCellTypeA, refCountData)
 pwyCellTypeB <- calibratePathway(pwyCellTypeB, refCountData)
 pwyMitosis <- calibratePathway(pwyMitosis, refCountData)
 pwySPhase <- calibratePathway(pwySPhase, refCountData)
-allPwys <- c(pwyCellTypeA, pwyCellTypeB, pwyMitosis, pwySPhase)
+pwyContactInhibition <- calibratePathway(pwyContactInhibition, refCountData)
+allPwys <- c(pwyCellTypeA, pwyCellTypeB, pwyMitosis, pwySPhase,
+    pwyContactInhibition)
 
 ge <- inSilicoGeneExpression(fig6Data[[1]], allPwys, params)
 
@@ -75,10 +77,11 @@ movAvg <- function(data)
     return(avg)
 }
 
-pwyActivity <- data.frame(cellTypeA = ge_bulk$pathways[[1]],
-    cellTypeB = ge_bulk$pathways[[2]],
+pwyActivity <- data.frame(CellTypeA = ge_bulk$pathways[[1]],
+    CellTypeB = ge_bulk$pathways[[2]],
     GtoM      = movAvg(ge_bulk$pathways[[3]]),
-    GtoS      = movAvg(ge_bulk$pathways[[4]])
+    GtoS      = movAvg(ge_bulk$pathways[[4]]),
+    ContactInhibition  = ge_bulk$pathways[[5]]
 )
 
 # get cell phase/type info
