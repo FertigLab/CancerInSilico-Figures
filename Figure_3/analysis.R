@@ -72,5 +72,5 @@ fig <- ggplot(plotData, aes(x=day)) +
         caption = "Figure 3", x = "Day", y = "Number Of Cells",
         color = "Dosage") 
 
-ggsave(filename='fig3.png', plot=fig)
+ggsave(filename='fig3.pdf', plot=fig, device='pdf')
 
