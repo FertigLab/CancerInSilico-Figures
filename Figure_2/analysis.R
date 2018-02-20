@@ -5,7 +5,7 @@ load('Figure_2_cleaned.RData') #fig2Data
 
 ## Figure 2a - Growth curves, w/ and w/out boundary
 
-png(filename='fig2a.png')
+pdf(filename='fig2a.pdf')
 
 iDen <- which(unname(sapply(fig2Data, function(l) l$initDensity))==0.2)
 iBound <- which(unname(sapply(fig2Data, function(l) l$boundary))>0)
@@ -45,7 +45,7 @@ df$ci[df$bd] <- sapply(df$den[df$bd], function(d) mean(df$ci[df$den==d & df$bd])
 df$ci[!df$bd] <- sapply(df$den[!df$bd], function(d) mean(df$ci[df$den==d & !df$bd]))
 
 fig <- ggplot(df, aes(x=den, y=ci, color=bd)) + geom_line()
-ggsave(filename='fig2b.png', plot=fig)
+ggsave(filename='fig2b.pdf', plot=fig, device='pdf')
 
 ## Figure 2c - Density over time, w/ and w/out boundary
 
@@ -62,4 +62,4 @@ df <- data.frame(time=rawData[,1], den=rawData[,2], bd=rawData[,3]>0,
     iDen=rawData[,4])
 
 fig <- ggplot(df, aes(x=time, y=den, col=bd)) + geom_point()
-ggsave(filename='fig2c.png', plot=fig)
+ggsave(filename='fig2c.pdf', plot=fig, device='pdf')
