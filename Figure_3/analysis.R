@@ -56,21 +56,19 @@ drugFits <- lapply(doses, function(d)
 plotData <- data.frame(day=seq(1,7),
     noDrugReal=noDrugData, 
     noDrugSim=noDrugFit$numCells[timePoints],
-    drugReal10=subset(tangData, dosage==10)$numCells,
-    drugSim10=drugFits[[which(doses==10)]]$numCells[timePoints],
     drugReal100=subset(tangData, dosage==100)$numCells,
     drugSim100=drugFits[[which(doses==100)]]$numCells[timePoints])
 
 fig <- ggplot(plotData, aes(x=day)) + 
-    geom_point(aes(y=noDrugReal, color='pbs'), size=2) + 
-    geom_line(aes(y=noDrugSim, color='pbs')) + 
-    geom_point(aes(y=drugReal10, color='10ug'), size=2) +
-    geom_line(aes(y=drugSim10, color='10ug')) +
-    geom_point(aes(y=drugReal100, color='100ug'), size=2) +
-    geom_line(aes(y=drugSim100, color='100ug')) + 
-    labs(title = "Fitting Real Data with CancerInSilico", 
-        caption = "Figure 3", x = "Day", y = "Number Of Cells",
-        color = "Dosage") 
+    geom_point(aes(y=noDrugReal, shape="PBS"), size=2) + 
+    geom_line(aes(y=noDrugSim, linetype="PBS")) + 
+    geom_point(aes(y=drugReal100, shape="100ug"), size=2) +
+    geom_line(aes(y=drugSim100, linetype="100ug")) + 
+    scale_linetype_manual(values=c('solid', 'dashed')) +
+    scale_shape_manual(values=c(17,16)) +
+    labs(title="Fitting Real Data with CancerInSilico",
+        caption="Figure 3", x="Day", y="Number Of Cells",
+        linetype="Simulated Data", shape="Real Data")
 
-ggsave(filename='fig3.png', plot=fig)
+ggsave(filename="fig3.pdf", plot=fig)
 

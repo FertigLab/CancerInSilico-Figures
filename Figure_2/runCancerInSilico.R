@@ -41,6 +41,9 @@ density <- allDensities[index[1]]
 boundary <- allBoundaries[index[2]]
 cellTypes <- c(allCellTypes[index[3]])
 
+# 2a - cycleLength = {12,20,28,36,44}
+# 2b - density = {0.05, 0.10, 0.20, 0.30, 0.40}
+
 #### Run Simulation ####
 
 if (!is.na(returnSize)) {
@@ -49,7 +52,7 @@ if (!is.na(returnSize)) {
 
 } else {
 
-    output <- runCellSimulation(initialNum=initialNum,
+    output <- inSilicoCellModel(initialNum=initialNum,
         runTime=runTime,
         density=density,
         boundary=boundary,

@@ -1,8 +1,8 @@
 library(CancerInSilico)
 
 ## read data, extract neccesary info
-allFiles <- list.files(path='~/data/figure_data/Figure_4', full.names = TRUE,
-    recursive = TRUE, pattern = "*.RData")
+allFiles <- list.files(path='/mnt/c/Users/tomsh/Documents/FertigLab/CancerInSilico/fig4_data',
+    full.names = TRUE, recursive = TRUE, pattern = "*.RData")
 
 fig4Data <- list()
 for (file in allFiles)
@@ -16,26 +16,38 @@ params@RNAseq <- FALSE
 params@singleCell <- FALSE
 params@nCells <- 50
 params@sampleFreq <- 4
-params@perError <- 0.05
+params@perError <- 0.1
 
-hours <- seq(0,144,params@sampleFreq)
-colNdx <- 1:length(hours)
+hours <- seq(24,168,params@sampleFreq)
+colNdx <- hours / params@sampleFreq + 1
 
+# load default pathways
 data(SamplePathways)
 
+# add gene overlap to growth pathway
+N <- length(pwyGrowth@genes)
+M_overlap <- sample(pwyGrowth@genes, N/2, replace=FALSE)
+S_overlap <- setdiff(pwyGrowth@genes, M_overlap)
+M_overlap <- pwyGrowth@genes
+S_overlap <- pwyGrowth@genes
+#overlap <- c(pwyMitosis@genes, pwySPhase@genes, pwyGrowth@genes)
+#pwyMitosis@genes <- overlap
+#pwySPhase@genes <- overlap
+# pwyGrowth@genes <- overlap
+
+# set expression levels
+pwyContactInhibition <- calibratePathway(pwyContactInhibition,
+    referenceGeneExpression)
 pwyGrowth <- calibratePathway(pwyGrowth, referenceGeneExpression)
 pwyMitosis <- calibratePathway(pwyMitosis, referenceGeneExpression)
 pwySPhase <- calibratePathway(pwySPhase, referenceGeneExpression)
-pwyContactInhibition <- calibratePathway(pwyContactInhibition,
-    referenceGeneExpression)
+
 allPwys <- c(pwyGrowth, pwyMitosis, pwySPhase, pwyContactInhibition)
 
 ge_pbs <- inSilicoGeneExpression(fig4Data[[1]], allPwys, params)
-ge_10ug <- inSilicoGeneExpression(fig4Data[[2]], allPwys, params)
 ge_100ug <- inSilicoGeneExpression(fig4Data[[3]], allPwys, params)
 
 ge_pbs$expression <- ge_pbs$expression[,colNdx]
-ge_10ug$expression <- ge_10ug$expression[,colNdx]
 ge_100ug$expression <- ge_100ug$expression[,colNdx]
 
 movAvg <- function(data)
@@ -57,16 +69,17 @@ pwyActivity <- data.frame(hour=hours,
     GtoS_pbs                =   movAvg(ge_pbs$pathways[[3]][colNdx]),
     contactInhibition_pbs   =   ge_pbs$pathways[[4]][colNdx],
 
-    activationGrowth_10ug   =   ge_10ug$pathways[[1]][colNdx],
-    mitosis_10ug            =   movAvg(ge_10ug$pathways[[2]][colNdx]),
-    GtoS_10ug               =   movAvg(ge_10ug$pathways[[3]][colNdx]),
-    contactInhibition_10ug  =   ge_10ug$pathways[[4]][colNdx],
-
     activationGrowth_100ug  =   ge_100ug$pathways[[1]][colNdx],
     mitosis_100ug           =   movAvg(ge_100ug$pathways[[2]][colNdx]),
     GtoS_100ug              =   movAvg(ge_100ug$pathways[[3]][colNdx]),
     contactInhibition_100ug =   ge_100ug$pathways[[4]][colNdx]
 )
 
-save(ge_pbs, ge_10ug, ge_100ug, pwyActivity, file='Figure_4_cleaned.RData')
+growthGenes <- pwyGrowth@genes
+mitosisGenes <- pwyMitosis@genes
+SPhaseGenes <- pwySPhase@genes
+contactInhibitionGenes <- pwyContactInhibition@genes
+
+save(ge_pbs, ge_100ug, pwyActivity, growthGenes, mitosisGenes,
+    SPhaseGenes, contactInhibitionGenes, file='Figure_4_cleaned.RData')
 
