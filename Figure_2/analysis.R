@@ -68,4 +68,3 @@ fig <- ggplot(df, aes(x=time, y=den, linetype=bd,
         linetype = "Boundary")
 
 ggsave(filename='fig2b.pdf', plot=fig)
-
