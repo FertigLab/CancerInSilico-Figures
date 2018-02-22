@@ -63,7 +63,6 @@ getSCE <- function(counts)
 sce <- getSCE(ge$expression)
 
 pdf(file='fig6.pdf', width=11, height=8.5)
-scater::plotPCA(sce, exprs_values = 'counts', colour_by = "Time",
-    ncomponents = 2)
-    #shape_by = "Type", ncomponents = 2)
+scater::plotPCA(sce, exprs_values = 'counts', shape_by = "Type",
+  colour_by = "Phase", ncomponents = 2)
 warnings()
