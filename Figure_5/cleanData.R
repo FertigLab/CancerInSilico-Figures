@@ -20,11 +20,11 @@ fig5Data <- list()
 for (file in allFiles)
 {
     load(file)
-    nCells <- sapply(0:output@runTime, getNumberOfCells, model=output)
-
+   
     fig5Data[[file]] <- list(
-        'numCells'    = nCells,
+        'density'    = sapply(0:output@runTime, getDensity, model=output),
         'numTypes'    = length(output@cellTypes),
+	'typeName'    = output@cellTypes[[1]]@name,
         'typeFreq' = output@cellTypeInitFreq
     )
     
