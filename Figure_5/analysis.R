@@ -1,179 +1,108 @@
-library('CancerInSilico')
 library('ggplot2')
-library('RColorBrewer')  
-library('reshape2') 
-library(methods)
 load("Figure_5_cleaned.RData")
 
-error.bar <- function(x, y, upper, lower=upper, length=0.1,...)
+nReplicates <- 200
+nVars <- 10
+
+getRunID <- function(name, nTypes)
 {
-    if (length(x) != length(y) | length(y) !=length(lower) | length(lower) != length(upper))
-        stop("vectors must be same length")
-    arrows(x,y+upper, x, y-lower, angle=90, code=3, length=length, ...)
+    end <- strsplit(name, "output_")[[1]][2]
+    id <- as.numeric(strsplit(end, ".RData")[[1]][1])
+    if (nTypes == 1)
+    {
+        return(floor((id - 1) / nReplicates) + 1)
+    }
+    else
+    {
+        return(floor((id - (nVars * nReplicates + 1)) / nReplicates) + 1)
+    }
 }
 
-singleTypeRun <- fig5Data[sapply(fig5Data, function(mod) mod$numTypes==1)]
-twoTypesRun <- fig5Data[sapply(fig5Data, function(mod) mod$numTypes==2)]
-#fourTypesRun <- fig5Data[sapply(fig5Data, function(mod) mod$numTypes==4)]
-#sixTypesRun <- fig5Data[sapply(fig5Data, function(mod) mod$numTypes==6)]
+getReplicateID <- function(name, nTypes)
+{
+    end <- strsplit(name, "output_")[[1]][2]
+    id <- as.numeric(strsplit(end, ".RData")[[1]][1])
+    return(((id - 1) %% nReplicates) + 1)
+}
 
-# single type
+processHittingTime <- function(out, name)
+{
+    hittingTime <- min(which(out$density > 0.60))
+    return(c(out$numTypes, getRunID(name, out$numTypes), hittingTime))
+}
 
-# two types
-lowVarianceRuns <- twoTypesRun[sapply(twoTypesRun, function(mod)
-    mod$typeFreq[1] > 0.4 & mod$typeFreq[1] < 0.6)]
-medVarianceRuns <- twoTypesRun[sapply(twoTypesRun, function(mod)
-    mod$typeFreq[1] > 0.2 & mod$typeFreq[1] < 0.8)]
-highVarianceRuns <- twoTypesRun[sapply(twoTypesRun, function(mod)
-    mod$typeFreq[1] > 0.0 & mod$typeFreq[1] < 1.0)]
+processRaw <- function(out, name)
+{
+    N <- length(out$density)
+    time <- 1:N - 1
+    den <- out$density
+    nTypes <- rep(out$numTypes, N)
+    runId <- rep(getRunID(name, out$numTypes), N)
+    repId <- rep(getReplicateID(name, out$numTypes), N)
+    return(cbind(time, den, nTypes, runId, repId))
+}
 
-# leave out 
+mat <- unname(t(sapply(names(fig5Data), function(name) processHittingTime(fig5Data[[name]], name))))
 
-# totals
-pdf('fig5_low_total.pdf')
-plot(NULL, xlim=c(0,168), ylim=c(0,1000), xlab="time (hrs)",
-    ylab="number of cells", main="Population Size Over Time")
-eat <- sapply(lowVarianceRuns, function(mod) lines(1:length(mod$numCells), mod$numCells))
+oneTypeData <- matrix(nrow=nVars, ncol=2)
+for (v in 1:nVars)
+{
+    ndx <- (mat[,1] == 1) & (mat[,2] == v)
+    oneTypeData[v,1] <- round(v/3, 2)
+    oneTypeData[v,2] <- sd(mat[ndx,3])
+}
 
-pdf('fig5_med_total.pdf')
-plot(NULL, xlim=c(0,168), ylim=c(0,1000), xlab="time (hrs)",
-    ylab="number of cells", main="Population Size Over Time")
-eat <- sapply(medVarianceRuns, function(mod) lines(1:length(mod$numCells), mod$numCells))
+twoTypeData <- matrix(nrow=nVars, ncol=2)
+for (v in 1:nVars)
+{
+    ndx <- (mat[,1] == 2) & (mat[,2] == v)
+    twoTypeData[v,1] <- 2 * 0.05 * v / sqrt(12)
+    twoTypeData[v,2] <- sd(mat[ndx,3])
+}
 
-pdf('fig5_high_total.pdf')
-plot(NULL, xlim=c(0,168), ylim=c(0,1000), xlab="time (hrs)",
-    ylab="number of cells", main="Population Size Over Time")
-eat <- sapply(highVarianceRuns, function(mod) lines(1:length(mod$numCells), mod$numCells))
+scale <- function(data, scale_data)
+{
+    mn <- min(scale_data)
+    mx <- max(scale_data)
+    fac <- (mx - mn) / (max(data) - min(data))
+    normed <- data - min(data)
+    return(normed * fac + mn)
+}
 
-# init freq
-pdf('fig5_low_freq.pdf')
-freqMat <- unname(sapply(lowVarianceRuns, function(mod) mod$typeFreq))
-meanVec <- apply(freqMat, 1, mean)
-sdVec <- apply(freqMat, 1, sd)
-barx <- barplot(meanVec, ylim=c(0,1.0), axis.lty=1, xlab="Cell Type",
-    ylab="Initial Frequency", main="Variance of Initial Cell Type Proportion")
-error.bar(barx, meanVec, 1.96 * sdVec / sqrt(length(sdVec)))
+rawList <- lapply(names(fig5Data), function(n) processRaw(fig5Data[[n]], n))
+N <- length(rawList)
+rawMat <- do.call(rbind, rawList[sample(1:N, 800)])
+rawDF <- data.frame(time=rawMat[,1], density=rawMat[,2], nTypes=rawMat[,3],
+    run_id=rawMat[,4], rep_id=rawMat[,5])
 
-pdf('fig5_med_freq.pdf')
-freqMat <- unname(sapply(medVarianceRuns, function(mod) mod$typeFreq))
-meanVec <- apply(freqMat, 1, mean)
-sdVec <- apply(freqMat, 1, sd)
-barx <- barplot(meanVec, ylim=c(0,1.0), axis.lty=1, xlab="Cell Type",
-    ylab="Initial Frequency", main="Variance of Initial Cell Type Proportion")
-error.bar(barx, meanVec, 1.96 * sdVec / sqrt(length(sdVec)))
+fig <- ggplot(subset(rawDF, nTypes==1 & run_id==1)) +
+    geom_line(aes(x=time, y=density, group=rep_id)) +
+    labs(title="Variance of Growth Rate within Single Cell Type", 
+        caption="Figure 5a, single cell type with small growth rate variance",
+        x="time (hrs)", y="Population Density")
+ggsave(filename='fig5a.pdf', plot=fig)
 
-pdf('fig5_high_freq.pdf')
-freqMat <- unname(sapply(highVarianceRuns, function(mod) mod$typeFreq))
-meanVec <- apply(freqMat, 1, mean)
-sdVec <- apply(freqMat, 1, sd)
-barx <- barplot(meanVec, ylim=c(0,1.0), axis.lty=1, xlab="Cell Type",
-    ylab="Initial Frequency", main="Variance of Initial Cell Type Proportion")
-error.bar(barx, meanVec, 1.96 * sdVec / sqrt(length(sdVec)))
+fig <- ggplot(subset(rawDF, nTypes==1 & run_id==10)) +
+    geom_line(aes(x=time, y=density, group=rep_id)) +
+    labs(title="Variance of Growth Rate within Single Cell Type", 
+        caption="Figure 5b, single cell type with large growth rate variance",
+        x="time (hrs)", y="Population Density")
+ggsave(filename='fig5b.pdf', plot=fig)
 
-# distribution
-#pdf('fig5_low_dist.pdf')
-#plot(density(sapply(lowVarianceRuns, function(mod) mod$numCells[48])), 
-#    main="distribution of cell population at 48 hours - 2 types",
-#    xlab="number of cells", ylab="density")
-#
-#pdf('fig5_med_dist.pdf')
-#plot(density(sapply(medVarianceRuns, function(mod) mod$numCells[48])), 
-#    main="distribution of cell population at 48 hours - 2 types",
-#    xlab="number of cells", ylab="density")
-#
-#pdf('fig5_high_dist.pdf')
-#plot(density(sapply(highVarianceRuns, function(mod) mod$numCells[48])), 
-#    main="distribution of cell population at 48 hours - 2 types",
-#    xlab="number of cells", ylab="density")
-
-#pdf('fig5_2_total.pdf')
-#plot(NULL, xlim=c(0,168), ylim=c(0,1000), xlab="time (hrs)",
-#    ylab="number of cells", main="two cell types")
-#eat <- sapply(twoTypesRun, function(mod) lines(1:length(mod$numCells), mod$numCells))
-#
-#pdf('fig5_2_freq.pdf')
-#freqMat <- unname(sapply(twoTypesRun, function(mod) mod$typeFreq))
-#meanVec <- apply(freqMat, 1, mean)
-#sdVec <- apply(freqMat, 1, sd)
-#barx <- barplot(meanVec, ylim=c(0,0.75), axis.lty=1, xlab="Cell Type",
-#    ylab="Initial Frequency", main="Two cell types - initial proportion")
-#error.bar(barx, meanVec, 1.96 * sdVec / sqrt(length(sdVec)))
-#
-#pdf('fig5_2_stddev.pdf')
-#plot(density(sapply(twoTypesRun, function(mod) mod$numCells[48])), 
-#    main="distribution of cell population at 48 hours - 2 types",
-#    xlab="number of cells", ylab="density")
-
-# 4 types
-#pdf('fig5_4_total.pdf')
-#plot(NULL, xlim=c(0,168), ylim=c(0,1000), xlab="time (hrs)",
-#    ylab="number of cells", main="four cell types")
-#eat <- sapply(fourTypesRun, function(mod) lines(1:length(mod$numCells), mod$numCells))
-#
-#pdf('fig5_4_freq.pdf')
-#freqMat <- unname(sapply(fourTypesRun, function(mod) mod$typeFreq))
-#meanVec <- apply(freqMat, 1, mean)
-#sdVec <- apply(freqMat, 1, sd)
-#barx <- barplot(meanVec, ylim=c(0,0.75), axis.lty=1, xlab="Cell Type",
-#    ylab="Initial Frequency", main="Four cell types - initial proportion")
-#error.bar(barx, meanVec, 1.96 * sdVec / sqrt(length(sdVec)))
-#
-#pdf('fig5_4_stddev.pdf')
-#plot(density(sapply(fourTypesRun, function(mod) mod$numCells[48])), 
-#    main="distribution of cell population at 48 hours - 4 types",
-#    xlab="number of cells", ylab="density")
-#
-### 6 types
-#pdf('fig5_6_total.pdf')
-#plot(NULL, xlim=c(0,168), ylim=c(0,1000), xlab="time (hrs)",
-#    ylab="number of cells", main="six cell types")
-#eat <- sapply(sixTypesRun, function(mod) lines(1:length(mod$numCells), mod$numCells))
-#
-#pdf('fig5_6_freq.pdf')
-#freqMat <- unname(sapply(sixTypesRun, function(mod) mod$typeFreq))
-#meanVec <- apply(freqMat, 1, mean)
-#sdVec <- apply(freqMat, 1, sd)
-#barx <- barplot(meanVec, ylim=c(0,0.75), axis.lty=1, xlab="Cell Type",
-#    ylab="Initial Frequency", main="Six cell types - initial proportion")
-#error.bar(barx, meanVec, 1.96 * sdVec / sqrt(length(sdVec)))
-#
-#pdf('fig5_6_stddev.pdf')
-#plot(density(sapply(sixTypesRun, function(mod) mod$numCells[48])), 
-#    main="distribution of cell population at 48 hours - 6 types",
-#    xlab="number of cells", ylab="density")
+fig <- ggplot(subset(rawDF, nTypes==2 & run_id==10)) +
+    geom_line(aes(x=time, y=density, group=rep_id)) +
+    labs(title="Variance of Initial Cell Type Distribution", 
+        caption="Figure 5c, two cell types with a large variance in the initial proportions",
+        x="time (hrs)", y="Population Density")
+ggsave(filename='fig5c.pdf', plot=fig)
 
 
-#pdf('fig5a2.pdf')
-#plot(NULL, xlim=c(0,168), ylim=c(0,1000))
-#eat <- sapply(threeTypesRun, function(mod) lines(1:length(mod$numCells), mod$numCells))
-#print(sd(sapply(threeTypesRun, function(mod) mod$numCells[50])))
+df <- data.frame(xa=c(oneTypeData[,1], scale(twoTypeData[,1], oneTypeData[,1])),
+    ya=c(oneTypeData[,2], twoTypeData[,2]), nTypes=factor(c(rep(1,nVars), rep(2,nVars))))
 
-#pdf('fig5a3.pdf')
-#plot(NULL, xlim=c(0,168), ylim=c(0,1000))
-#eat <- sapply(fiveTypesRun, function(mod) lines(1:length(mod$numCells), mod$numCells))
-#print(sd(sapply(fiveTypesRun, function(mod) mod$numCells[50])))
-
-#fig <- ggplot(subset(fig5data, density == 0.05 & cycleLength %in% c(12,18,24)), aes(x=time)) + 
-    #geom_point(aes(y=cellTypeBFreq)) 
-#ggsave(filename='fig5a.pdf', plot=fig)
-
-#mat <- matrix(nrow=length(cellTypeBInitFreq), ncol=length(cellTypeBCycleLength))
-#for (data in fig5data)
-#{
-#	xind <- which(cellTypeBInitFreq == data[1])
-#	yind <- which(cellTypeBCycleLength == data[2])
-#	mat[xind, yind] <- data[3]
-#}
-#
-#fpm <- mat
-#fpm.melted <- melt(fpm)
-#hm.palette <- colorRampPalette(rev(brewer.pal(9, 'YlOrRd')), space='Lab')
-#fig <- ggplot(fpm.melted, aes(x = Var1, y = Var2, fill = value)) +
-#        geom_tile() +
-#        scale_fill_gradientn(colours = hm.palette(100)) +
-#        ylab('Cycle Length of Faster Growing Cell Type') +
-#        xlab('Initial Proportion of Slower Growing Cell Type') +
-#        ggtitle("With boundary") +
-#        theme(plot.title = element_text(hjust = 0.5)) +
-#        theme(axis.text=element_text(size=10))
-
+fig <- ggplot(df, aes(x=xa, y=ya, linetype=nTypes)) + geom_line() +
+    scale_linetype_manual(values=c("dashed", "solid")) +
+    labs(title="Heterogeneity within vs between tumors", 
+        caption="Figure 5d, variance in growth rate for single cell type, and initial proportion for two cell types",
+        x="Growth Rate/Cell Type Variance", y="Population Growth Variance", linetype="N Cell Types")
+ggsave(filename='fig5d.pdf', plot=fig)
