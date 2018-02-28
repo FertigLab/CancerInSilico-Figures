@@ -1,9 +1,11 @@
-library(ggplot2)
-library(gplots)
-library(CancerInSilico)
-library(methods)
-load('Figure_4_cleaned.RData') #ge_pbs, ge_10ug, ge_100ug, pwyActivity
-data(SamplePathways)
+#library(ggplot2)
+#library(gplots)
+#library(methods)
+load('Figure_4_cleaned.RData')
+#data(SamplePathways)
+
+
+# plot heatmaps
 
 png(file='fig4d.png')
 heatmap.2(ge_100ug$expression, col=greenred, scale='row', trace='none',
