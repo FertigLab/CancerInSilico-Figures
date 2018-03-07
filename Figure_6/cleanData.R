@@ -1,19 +1,6 @@
 library(CancerInSilico)
 
-## read data, extract neccesary info
-allFiles <- list.files(path='~/data/figure_data/Figure_5', full.names = TRUE,
-    recursive = TRUE, pattern = "*.RData")
-
-fig6Data <- list()
-for (file in allFiles)
-{
-    load(file)
-    if (output@cellTypeInitFreq[1] > 0.35 & output@cellTypeInitFreq[1] < 0.45)
-    {
-        fig6Data[[1]] <- output
-        break
-    }
-}
+load('Fig6_RawData.RData')
 
 params <- new('GeneExpressionParams')
 params@RNAseq <- TRUE
@@ -23,7 +10,6 @@ params@sampleFreq <- 4
 params@splatParams <- splatter::setParam(params@splatParams, "dropout.present", TRUE)
 
 data(SamplePathways)
-
 refCountData <- round(2 ^ referenceGeneExpression - 1)
 
 pwyCellTypeA <- new('Pathway', genes = pwyGrowth@genes[1:241],
@@ -58,11 +44,11 @@ pwyContactInhibition <- calibratePathway(pwyContactInhibition, refCountData)
 allPwys <- c(pwyCellTypeA, pwyCellTypeB, pwyMitosis, pwySPhase,
     pwyContactInhibition)
 
-ge <- inSilicoGeneExpression(fig6Data[[1]], allPwys, params)
+ge <- inSilicoGeneExpression(twoTypesModel, allPwys, params)
 
 params@singleCell <- FALSE
 
-ge_bulk <- inSilicoGeneExpression(fig6Data[[1]], allPwys, params)
+ge_bulk <- inSilicoGeneExpression(twoTypesModel, allPwys, params)
 
 movAvg <- function(data)
 {
@@ -86,7 +72,7 @@ pwyActivity <- data.frame(CellTypeA = ge_bulk$pathways[[1]],
 
 # get cell phase/type info
 cellType <- c()
-nCells <- getNumberOfCells(fig6Data[[1]], 168)
+nCells <- getNumberOfCells(twoTypesModel, 168)
 cellPhase <- matrix('NoCell', nrow=nCells, ncol=169)
 
 SPhaseExp <- function(model, cell, time)
@@ -102,19 +88,19 @@ SPhaseExp <- function(model, cell, time)
 
 for (c in 1:nCells)
 {
-    cellType[c] <- getCellType(fig6Data[[1]], 168, c)
+    cellType[c] <- getCellType(twoTypesModel, 168, c)
 }
 
 for (t in 0:168)
 {
-    nCells <- getNumberOfCells(fig6Data[[1]], t)
+    nCells <- getNumberOfCells(twoTypesModel, t)
 
     for (c in 1:nCells)
     {
-        if (SPhaseExp(fig6Data[[1]], c, t)) {
+        if (SPhaseExp(twoTypesModel, c, t)) {
             cellPhase[c,t+1] <- 'S'
         } else {
-            cellPhase[c,t+1] <- getCellPhase(fig6Data[[1]], t, c)
+            cellPhase[c,t+1] <- getCellPhase(twoTypesModel, t, c)
         }
     }
 }

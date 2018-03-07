@@ -3,7 +3,9 @@ library(gplots)
 library(CancerInSilico)
 library(scater)
 library(methods)
-load('Figure_6_cleaned.RData') #ge_pbs, ge_10ug, ge_100ug, pwyActivity
+load('Figure_6_cleaned.RData') # pwyActivity, ge, ge_bulk, cellPhase, cellType
+
+set.seed(123)
 
 getType <- function(str)
 {
@@ -35,9 +37,9 @@ getSCE <- function(counts)
     S_phase <- which(cell_phases == 'S')
     M_phase <- which(cell_phases == 'M')
 
-    sampled <- c(sample(I_phase, floor(length(I_phase) / 5), replace=F),
-                 sample(S_phase, floor(length(S_phase) / 5), replace=F),
-                 sample(M_phase, floor(length(M_phase) / 5), replace=F))
+    sampled <- c(sample(I_phase, floor(length(I_phase) / 3), replace=F),
+                 sample(S_phase, floor(length(S_phase) / 3), replace=F),
+                 sample(M_phase, floor(length(M_phase) / 3), replace=F))
 
     sampled <- sample(1:ncol(counts), floor(ncol(counts) / 10), replace=F)
     counts <- counts[,sampled]

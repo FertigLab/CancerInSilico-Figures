@@ -1,129 +1,120 @@
 # load libraries
 library(CancerInSilico)
 data(SamplePathways)
+library(foreach)
+library(doParallel)
 
-# load the fitted simulations from figure 3
-load("../Figure_3/Fig3_Fitted_Simulations.RData")
+# load cell models
+load("Fig4_RawData.RData")
 
 # STC.D PBS/CTX @ 0,24,48,72,96,120 hours
 load("../../DataFromKagohara/STCCountsCG.Rda")
 
 # tangExpressionData @ 0,4,8,24,48,72,96,120,144
-load(".././DataFromTang/TangExpressionData.Rda")
-
+load("../../DataFromTang/TangExpressionData.Rda")
 
 # for sampling done prior to main functions which set their own seed internally
 set.seed(123)
 
-# run cell model
-runModel <- function(sim)
-{
-    type <- new('CellType', name='DEFAULT', minCycle=sim$cycleLength,
-        cycleLength=function() sim$cycleLength)
-    drug <- new('Drug', name='DEFAULT', timeAdded=24,
-        cycleLengthEffect=function(a,b) rnorm(n=1, mean=b*sim$drugEffect, sd=4))
-    inSilicoCellModel(initialNum=100, runTime=168, density=sim$initDensity,
-        boundary=1, syncCycle=FALSE, randSeed=0, outputIncrement=4,
-        recordIncrement=0.25, timeIncrement=0.001, cellTypes=c(type),
-        cellTypeInitFreq=c(1), drugs=c(drug), maxDeformation=0.1,
-        maxTranslation=0.1, maxRotation=0.3, nG=28, epsilon=10, delta=0.2)
-}
+# create pathways for various overlap
+M_none <- pwyMitosis@genes
+S_none <- pwySPhase@genes
+G_none <- pwyGrowth@genes
+CI_none <- pwyContactInhibition@genes
+
+M_half <- c(M_none, sample(G_none, length(G_none) / 2, replace=FALSE))
+S_half <- c(S_none, setdiff(G_none, M_half))
+G_half <- G_none
+CI_half <- CI_none
+
+M_full <- c(M_none, G_none)
+S_full <- c(S_none, G_none)
+G_full <- G_none
+CI_full <- CI_none
 
 # generate gene expression data
-params <- new('GeneExpressionParams')
-params@RNAseq <- RNAseq
-params@singleCell <- FALSE
-params@nCells <- 50
-params@sampleFreq <- 4
-params@perError <- 0.1
-simExpression <- function(refData, overlap='none', RNAseq=FALSE)
+simExpression <- function(model, refData, overlap='none', RNAseq=FALSE)
 {
+    params <- new('GeneExpressionParams')
     params@RNAseq <- RNAseq
+    params@singleCell <- FALSE
+    params@nCells <- 50
+    params@sampleFreq <- 24
+    params@perError <- 0.1
 
-    if (overlap == 'half')
-    {
-        N <- length(pwyGrowth@genes)
-        M_overlap <- sample(pwyGrowth@genes, N/2, replace=FALSE)
-        S_overlap <- setdiff(pwyGrowth@genes, M_overlap)
-        pwyMitosis@genes <- c(pwyMitosis@genes, M_overlap)
-        pwySPhase@genes <- c(pwySPhase@genes, S_overlap)
-    }
-    else if (ovelap == 'full')
-    {
-        overlap <- c(pwyMitosis@genes, pwySPhase@genes, pwyGrowth@genes)
-        pwyMitosis@genes <- overlap
-        pwySPhase@genes <- overlap
-        pwyGrowth@genes <- overlap
-    }
+    M_genes <- switch(overlap, none=M_none, half=M_half, full=M_full)
+    S_genes <- switch(overlap, none=S_none, half=S_half, full=S_full)
+    G_genes <- switch(overlap, none=G_none, half=G_half, full=G_full)
+    CI_genes <- switch(overlap, none=CI_none, half=CI_half, full=CI_full)
+
+    pwyMitosis@genes <- M_genes[M_genes %in% rownames(refData)]
+    pwySPhase@genes <- S_genes[S_genes %in% rownames(refData)]
+    pwyGrowth@genes <- G_genes[G_genes %in% rownames(refData)]
+    pwyContactInhibition@genes <- CI_genes[CI_genes %in% rownames(refData)]
 
     pwyContactInhibition <- calibratePathway(pwyContactInhibition, refData)
     pwyGrowth <- calibratePathway(pwyGrowth, refData)
     pwyMitosis <- calibratePathway(pwyMitosis, refData)
     pwySPhase <- calibratePathway(pwySPhase, refData)
     allPwys <- c(pwyGrowth, pwyMitosis, pwySPhase, pwyContactInhibition)
+    inSilicoGeneExpression(model, allPwys, params)
 }
 
-# re-run the model to get the full cell data
-
-tang_pbs_mod <- runModel(tangFit[['pbs']])
-tang_10ug_mod <- runModel(tangFit[['10ug']])
-tang_100ug_mod <- runModel(tangFit[['100ug']])
-kagohara_pbs_scc1_mod <- runModel(kagoharaFit[['pbs_scc1']])
-kagohara_pbs_scc6_mod <- runModel(kagoharaFit[['pbs_scc6']])
-kagohara_pbs_scc25_mod <- runModel(kagoharaFit[['pbs_scc25']])
-kagohara_ctx_scc1_mod <- runModel(kagoharaFit[['pbs_scc1']])
-kagohara_ctx_scc6_mod <- runModel(kagoharaFit[['ctx_scc6']])
-kagohara_ctx_scc25_mod <- runModel(kagoharaFit[['ctx_scc25']])
-
 # generate expression data
-
-tang_pbs_none <- simExpression(tang_pbs_mod, D.gene, "none")
-tang_pbs_full <- simExpression(tang_pbs_mod, D.gene, "full")
-tang_100ug_none <- simExpression(tang_100ug_mod, D.gene, "none")
-tang_100ug_full <- simExpression(tang_100ug_mod, D.gene, "full")
-
-tang_none <- cbind(tang_pbs_none$expression, tang_100ug_none$expression)
-tang_full <- cbind(tang_pbs_full$expression, tang_100ug_full$expression)
-
+cl <- makeCluster(6)
+registerDoParallel(cl)
 STC_transformed <- floor(2^STC.D)
-kagohara_pbs_scc1_none <- simExpression(kagohara_pbs_scc1_mod, STC_transformed, "none", TRUE)
-kagohara_pbs_scc6_none <- simExpression(kagohara_pbs_scc6_mod, STC_transformed, "none", TRUE)
-kagohara_pbs_scc25_none <- simExpression(kagohara_pbs_scc25_mod, STC_transformed, "none", TRUE)
-kagohara_ctx_scc1_none <- simExpression(kagohara_ctx_scc1_mod, STC_transformed, "none", TRUE)
-kagohara_ctx_scc6_none <- simExpression(kagohara_ctx_scc6_mod, STC_transformed, "none", TRUE)
-kagohara_ctx_scc25_none <- simExpression(kagohara_ctx_scc25_mod, STC_transformed, "none", TRUE)
+ge <- foreach(i = 1:24, .packages="CancerInSilico") %dopar%
+{
+    if (i <= 2)
+    {
+        j <- ifelse(i == 1, 1, 3)
+        simExpression(cellModels[[j]], tangExpressionData, "none")
+    }
+    else if (i <= 4)
+    {
+        j <- ifelse(i == 3, 1, 3)
+        simExpression(cellModels[[j]], tangExpressionData, "half")
+    }
+    else if (i <= 6)
+    {
+        j <- ifelse(i == 3, 1, 3)
+        simExpression(cellModels[[j]], tangExpressionData, "full")
+    }
+    else if (i <= 12)
+    {
+        simExpression(cellModels[[i-3]], STC_transformed, "none", TRUE)
+    }
+    else if (i <= 18)
+    {
+        simExpression(cellModels[[i-9]], STC_transformed, "half", TRUE)
+    }
+    else
+    {
+        simExpression(cellModels[[i-15]], STC_transformed, "full", TRUE)
+    }
+}
+stopCluster(cl)
 
-kagohara_none <- cbind(
-    kagohara_pbs_scc1_none$expression,
-    kagohara_pbs_scc6_none$expression,
-    kagohara_pbs_scc25_none$expression,
-    kagohara_ctx_scc1_none$expression,
-    kagohara_ctx_scc6_none$expression,
-    kagohara_ctx_scc25_none$expression
-)
+# combine raw data
+tang_none <- cbind(ge[[1]]$expression, ge[[2]]$expression)
+tang_half <- cbind(ge[[3]]$expression, ge[[4]]$expression)
+tang_full <- cbind(ge[[5]]$expression, ge[[6]]$expression)
 
-kagohara_pbs_scc1_full <- simExpression(kagohara_pbs_scc1_mod, STC_transformed, "full", TRUE)
-kagohara_pbs_scc6_full <- simExpression(kagohara_pbs_scc6_mod, STC_transformed, "full", TRUE)
-kagohara_pbs_scc25_full <- simExpression(kagohara_pbs_scc25_mod, STC_transformed, "full", TRUE)
-kagohara_ctx_scc1_full <- simExpression(kagohara_ctx_scc1_mod, STC_transformed, "full", TRUE)
-kagohara_ctx_scc6_full <- simExpression(kagohara_ctx_scc6_mod, STC_transformed, "full", TRUE)
-kagohara_ctx_scc25_full <- simExpression(kagohara_ctx_scc25_mod, STC_transformed, "full", TRUE)
-
-kagohara_full <- cbind(
-    kagohara_pbs_scc1_full$expression,
-    kagohara_pbs_scc6_full$expression,
-    kagohara_pbs_scc25_full$expression,
-    kagohara_ctx_scc1_full$expression,
-    kagohara_ctx_scc6_full$expression,
-    kagohara_ctx_scc25_full$expression
-)
-
-# subset gene expression data to match real data sample points
+kagohara_none <- cbind(ge[[7]]$expression, ge[[8]]$expression,
+    ge[[9]]$expression, ge[[10]]$expression, ge[[11]]$expression,
+    ge[[12]]$expression)
+kagohara_half <- cbind(ge[[13]]$expression, ge[[14]]$expression,
+    ge[[15]]$expression, ge[[16]]$expression, ge[[17]]$expression,
+    ge[[18]]$expression)
+kagohara_full <- cbind(ge[[19]]$expression, ge[[20]]$expression,
+    ge[[21]]$expression, ge[[22]]$expression, ge[[23]]$expression,
+    ge[[24]]$expression)
 
 # needed for smoothing pathwat activity
 movAvg <- function(data)
 {
-    window <- 24 / params@sampleFreq
+    window <- 24 / 24 # denom = sample frequency
     avg <- c()    
     for (i in 1:length(data))
     {
@@ -135,18 +126,19 @@ movAvg <- function(data)
 }
 
 # only do for tang - overlap does not matter
-tangPwyActivity <- data.frame(hour=hours,
-    activationGrowth_pbs    =   tang_pbs_none$pathways[[1]],
-    mitosis_pbs             =   movAvg(tang_pbs_none$pathways[[2]]),
-    GtoS_pbs                =   movAvg(tang_pbs_none$pathways[[3]]),
-    contactInhibition_pbs   =   tang_pbs_none$pathways[[4]],
+tangPwyActivity <- data.frame(hour=seq(0,168,24),
+    activationGrowth_pbs    =   ge[[1]]$pathways[[1]],
+    mitosis_pbs             =   movAvg(ge[[1]]$pathways[[2]]),
+    GtoS_pbs                =   movAvg(ge[[1]]$pathways[[3]]),
+    contactInhibition_pbs   =   ge[[1]]$pathways[[4]],
 
-    activationGrowth_100ug  =   tang_100ug_none$pathways[[1]],
-    mitosis_100ug           =   movAvg(tang_100ug_none$pathways[[2]]),
-    GtoS_100ug              =   movAvg(tang_100ug_none$pathways[[3]]),
-    contactInhibition_100ug =   tang_100ug_none$pathways[[4]]
+    activationGrowth_100ug  =   ge[[2]]$pathways[[1]],
+    mitosis_100ug           =   movAvg(ge[[2]]$pathways[[2]]),
+    GtoS_100ug              =   movAvg(ge[[2]]$pathways[[3]]),
+    contactInhibition_100ug =   ge[[2]]$pathways[[4]]
 )
 
-save(tang_none, tang_full, kagohara_none, kagohara_full, tangPwyActivity,
+save(tang_none, tang_half, tang_full, kagohara_none, kagohara_half,
+    kagohara_full, tangPwyActivity, M_half, S_half,
     file='Figure_4_cleaned.RData')
 

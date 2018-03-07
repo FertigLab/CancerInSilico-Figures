@@ -54,10 +54,10 @@ for (i in c(8,15)) # day 1 index for ctx
 # plot both fits
 realData$dosage <- factor(realData$dosage, labels=c("PBS", "10ug", "100ug"))
 fig <- ggplot(realData) +
-    geom_point(aes(x=day, y=numCells, shape=factor(dosage))) + 
-    geom_line(aes(x=day, y=Fit, linetype=factor(dosage))) +
+    geom_point(aes(x=day, y=numCells, shape=factor(dosage), color=factor(dosage))) + 
+    geom_line(aes(x=day, y=Fit, linetype=factor(dosage), color=factor(dosage))) +
     scale_linetype_manual(values=c("solid", "dashed", "dotdash")) +
-    labs(title="Tang Data", linetype="Simulated Data", shape="Real Data",
+    labs(title="Tang Data", linetype="Dosage", shape="Dosage", color="Dosage",
         caption="Figure 3a", x="Day", y="Number Of Cells")
 ggsave(filename="fig3a.pdf", plot=fig)
 
@@ -100,16 +100,16 @@ for (i in c(1,7,13)) # day 0 index of each cell line for PBS
 
 # plot pbs fit
 fig <- ggplot(subset(realData, Treatment=='PBS')) +
-    geom_point(aes(x=Day, y=Mean, shape=CellLine)) + 
-    geom_line(aes(x=Day, y=Fit, group=CellLine)) +
+    geom_point(aes(x=Day, y=Mean, shape=CellLine, color=CellLine)) + 
+    geom_line(aes(x=Day, y=Fit, group=CellLine, color=CellLine)) +
     labs(title="Kagohara Data - PBS",
         caption="Figure 3b", x="Day", y="Number Of Cells")
 ggsave(filename="fig3b.pdf", plot=fig)
 
 # plot ctx fit
 fig <- ggplot(subset(realData, Treatment=='CTX')) +
-    geom_point(aes(x=Day, y=Mean, shape=CellLine)) + 
-    geom_line(aes(x=Day, y=Fit, group=CellLine)) +
+    geom_point(aes(x=Day, y=Mean, shape=CellLine, color=CellLine)) + 
+    geom_line(aes(x=Day, y=Fit, group=CellLine, color=CellLine)) +
     labs(title="Kagohara Data - CTX",
         caption="Figure 3c", x="Day", y="Number Of Cells")
 ggsave(filename="fig3c.pdf", plot=fig)
