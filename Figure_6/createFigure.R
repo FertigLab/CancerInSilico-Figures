@@ -1,4 +1,9 @@
+# load libraries
+
 library(CancerInSilico)
+library(ggplot2)
+
+# simulate data
 
 typeA <- new('CellType', name='A', minCycle=24-4,
     cycleLength=function() max(24-4, rnorm(1,24,1)))

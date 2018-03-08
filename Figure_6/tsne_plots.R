@@ -31,7 +31,7 @@ myColorRamp <- function(values,palette=viridis(255)) {
   v <- (values - min(values))/diff(range(values))
   #v <- min(values/diff(range(values)),1.0)
   x <- colorRamp(palette)(v)
-  print(x)
+  #print(x)
   rgb(x[,1], x[,2], x[,3], maxColorValue = 255)
 }
 
@@ -39,7 +39,9 @@ COL<-myColorRamp(time)
 
 library(rgl)
 
+#pdf("fig6_tsne_coloredbyPHASE.pdf", width=13, height=10)
 plot3d(tsne_out$Y,col=phase)
+#dev.off()
 rgl.postscript("fig6_tsne_coloredbyPHASE.pdf", fmt = "pdf", drawText = TRUE )
 
 plot3d(tsne_out$Y,col=type)

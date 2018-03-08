@@ -1,8 +1,10 @@
 library('ggplot2')
 load("Figure_5_cleaned.RData")
 
-nReplicates <- 200
+nReplicates <- 40
 nVars <- 10
+
+#### Figures 5abcd
 
 getRunID <- function(name, nTypes)
 {
@@ -25,84 +27,70 @@ getReplicateID <- function(name, nTypes)
     return(((id - 1) %% nReplicates) + 1)
 }
 
-processHittingTime <- function(out, name)
-{
-    hittingTime <- min(which(out$density > 0.60))
-    return(c(out$numTypes, getRunID(name, out$numTypes), hittingTime))
-}
-
 processRaw <- function(out, name)
 {
-    N <- length(out$density)
+    N <- length(out$numCells)
     time <- 1:N - 1
-    den <- out$density
+    nCells <- out$numCells
     nTypes <- rep(out$numTypes, N)
     runId <- rep(getRunID(name, out$numTypes), N)
     repId <- rep(getReplicateID(name, out$numTypes), N)
-    return(cbind(time, den, nTypes, runId, repId))
-}
-
-mat <- unname(t(sapply(names(fig5Data), function(name) processHittingTime(fig5Data[[name]], name))))
-
-oneTypeData <- matrix(nrow=nVars, ncol=2)
-for (v in 1:nVars)
-{
-    ndx <- (mat[,1] == 1) & (mat[,2] == v)
-    oneTypeData[v,1] <- round(v/3, 2)
-    oneTypeData[v,2] <- sd(mat[ndx,3])
-}
-
-twoTypeData <- matrix(nrow=nVars, ncol=2)
-for (v in 1:nVars)
-{
-    ndx <- (mat[,1] == 2) & (mat[,2] == v)
-    twoTypeData[v,1] <- 2 * 0.05 * v / sqrt(12)
-    twoTypeData[v,2] <- sd(mat[ndx,3])
-}
-
-scale <- function(data, scale_data)
-{
-    mn <- min(scale_data)
-    mx <- max(scale_data)
-    fac <- (mx - mn) / (max(data) - min(data))
-    normed <- data - min(data)
-    return(normed * fac + mn)
+    return(cbind(time, nCells, nTypes, runId, repId))
 }
 
 rawList <- lapply(names(fig5Data), function(n) processRaw(fig5Data[[n]], n))
-N <- length(rawList)
-rawMat <- do.call(rbind, rawList[sample(1:N, 800)])
-rawDF <- data.frame(time=rawMat[,1], density=rawMat[,2], nTypes=rawMat[,3],
+rawMat <- do.call(rbind, rawList)
+rawDF <- data.frame(time=rawMat[,1], nCells=rawMat[,2], nTypes=rawMat[,3],
     run_id=rawMat[,4], rep_id=rawMat[,5])
 
 fig <- ggplot(subset(rawDF, nTypes==1 & run_id==1)) +
-    geom_line(aes(x=time, y=density, group=rep_id)) +
+    geom_line(aes(x=time, y=nCells, group=rep_id)) +
     labs(title="Variance of Growth Rate within Single Cell Type", 
         caption="Figure 5a, single cell type with small growth rate variance",
         x="time (hrs)", y="Population Density")
 ggsave(filename='fig5a.pdf', plot=fig)
 
 fig <- ggplot(subset(rawDF, nTypes==1 & run_id==10)) +
-    geom_line(aes(x=time, y=density, group=rep_id)) +
+    geom_line(aes(x=time, y=nCells, group=rep_id)) +
     labs(title="Variance of Growth Rate within Single Cell Type", 
         caption="Figure 5b, single cell type with large growth rate variance",
         x="time (hrs)", y="Population Density")
 ggsave(filename='fig5b.pdf', plot=fig)
 
-fig <- ggplot(subset(rawDF, nTypes==2 & run_id==10)) +
-    geom_line(aes(x=time, y=density, group=rep_id)) +
+fig <- ggplot(subset(rawDF, nTypes==2 & run_id==1)) +
+    geom_line(aes(x=time, y=nCells, group=rep_id)) +
     labs(title="Variance of Initial Cell Type Distribution", 
-        caption="Figure 5c, two cell types with a large variance in the initial proportions",
+        caption="Figure 5c, two cell types with a small variance in the initial proportions",
         x="time (hrs)", y="Population Density")
 ggsave(filename='fig5c.pdf', plot=fig)
 
+fig <- ggplot(subset(rawDF, nTypes==2 & run_id==10)) +
+    geom_line(aes(x=time, y=nCells, group=rep_id)) +
+    labs(title="Variance of Initial Cell Type Distribution", 
+        caption="Figure 5c, two cell types with a large variance in the initial proportions",
+        x="time (hrs)", y="Population Density")
+ggsave(filename='fig5d.pdf', plot=fig)
 
-df <- data.frame(xa=c(oneTypeData[,1], scale(twoTypeData[,1], oneTypeData[,1])),
-    ya=c(oneTypeData[,2], twoTypeData[,2]), nTypes=factor(c(rep(1,nVars), rep(2,nVars))))
+#### Figure 5e
 
-fig <- ggplot(df, aes(x=xa, y=ya, linetype=nTypes)) + geom_line() +
+mat <- matrix(nrow=(nVars * 2), ncol=3)
+finalTime <- max(rawDF$time)
+for (n in 1:2)
+{
+    for (v in 1:nVars)
+    {
+        temp <- subset(rawDF, time==finalTime & nTypes==n & run_id==v)
+        row <- v + (n - 1) * nVars
+        mat[row,1] <- n
+        mat[row,2] <- v
+        mat[row,3] <- var(temp$nCells)
+    }
+}
+df <- data.frame(nTypes=mat[,1], init_var=mat[,2], final_var=mat[,3])
+
+fig <- ggplot(df, aes(x=init_var, y=final_var, linetype=factor(nTypes))) + geom_line() +
     scale_linetype_manual(values=c("dashed", "solid")) +
     labs(title="Heterogeneity within vs between tumors", 
         caption="Figure 5d, variance in growth rate for single cell type, and initial proportion for two cell types",
         x="Growth Rate/Cell Type Variance", y="Population Growth Variance", linetype="N Cell Types")
-ggsave(filename='fig5d.pdf', plot=fig)
+ggsave(filename='fig5e.pdf', plot=fig)
