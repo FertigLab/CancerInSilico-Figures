@@ -1,8 +1,11 @@
 library(CancerInSilico)
 
+args <- commandArgs(TRUE)
+dir <- args[1]
+
 ## read data, extract neccesary info
-allFiles <- list.files(path='../Data/Figure_3', full.names = TRUE,
-    recursive = TRUE, pattern = "*.RData")
+allFiles <- list.files(path=dir, full.names=TRUE, recursive=TRUE,
+    pattern="*.RData")
 
 getDrugEffect <- function(d)
 {

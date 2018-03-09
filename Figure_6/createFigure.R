@@ -1,21 +1,44 @@
-# load libraries
+library(Rtsne)
+library(viridis)
+library(rgl)
+load("fig6.RData") # ge, cellType, cellPhase
+set.seed(123)
 
-library(CancerInSilico)
-library(ggplot2)
+time <- sapply(colnames(ge), function(x) strsplit(x,"_")[[1]][2])
+time <- as.numeric(gsub("t", "", time))
 
-# simulate data
+phase <- rep("blue",length(cellPhase))
+phase[which(cellPhase == "M")] <- "orange"
+phase[which(cellPhase == "S")] <- "cyan"
 
-typeA <- new('CellType', name='A', minCycle=24-4,
-    cycleLength=function() max(24-4, rnorm(1,24,1)))
+type <- rep("red", length(cellPhase))
+type[which(cellType == 2)] <- "purple"
 
-typeB <- new('CellType', name='B', minCycle=36-4,
-    cycleLength=function() max(36-4, rnorm(1,36,1)))
+tsne_out <- Rtsne(t(ge), dims=3, initial_dims=3, perplexity=30,
+       theta=0.5, pca=TRUE, max_iter=1000, verbose=TRUE)
 
-twoTypesModel <- inSilicoCellModel(initialNum=100, runTime=168, density=0.05,
-    boundary=1, syncCycle=FALSE, randSeed=123, outputIncrement=4,
-    recordIncrement=0.25, timeIncrement=0.001, cellTypes=c(typeA, typeB),
-    cellTypeInitFreq=c(0.5,0.5), maxDeformation=0.1,
-    maxTranslation=0.1, maxRotation=0.3, nG=28, epsilon=10, delta=0.2)
+myColorRamp <- function(values, palette=viridis(255))
+{
+    if (min(values) < 0)
+    {  
+       values <- values + abs(min(values))
+    }
+    v <- (values - min(values)) / diff(range(values))
+    x <- colorRamp(palette)(v)
+    rgb(x[,1], x[,2], x[,3], maxColorValue=255)
+}
 
-# save data
-save(twoTypesModel, file="Fig6_RawData.RData")
+par3d(windowRect=c(0,0,800,800))
+
+plot3d(tsne_out$Y, col=phase, xlab="", ylab="", zlab="")
+rgl.postscript("fig6_tsne_coloredbyPHASE.pdf", fmt="pdf", drawText=TRUE)
+
+plot3d(tsne_out$Y, col=type, xlab="", ylab="", zlab="")
+rgl.postscript("fig6_tsne_coloredbyTYPE.pdf", fmt="pdf", drawText=TRUE)
+
+plot3d(tsne_out$Y, col=myColorRamp(time), xlab="", ylab="", zlab="")
+rgl.postscript("fig6_tsne_coloredbyTIME.pdf", fmt="pdf", drawText=TRUE)
+
+#make movie 
+#rot <- spin3d(axis=c( 0, 0, 1 ))
+#movie3d(rot, duration= 12, type="gif",movie="fig6_tsne_wPCA")

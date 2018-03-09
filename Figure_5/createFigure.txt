@@ -1,0 +1,9 @@
+# create raw data
+rm -rf ~/data/figure_data/Figure_5
+./createData ~/data/figure_data/Figure_5
+
+# clean raw data
+sbatch cleanData.sh ~/data/figure_data/Figure_5
+
+# create figure 
+Rscript createFigure.R
