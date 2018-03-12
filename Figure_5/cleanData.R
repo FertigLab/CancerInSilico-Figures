@@ -14,6 +14,12 @@ getSD <- function(cellType)
     (getMean(cellType) - cellType@minCycle) / 2
 }
 
+getTypeAProportion <- function(time, mod)
+{
+    N <- getNumberOfCells(mod, time)
+    sum(sapply(1:N, function(i) getCellType(mod, time, i)==1)) / N
+}
+
 fileNo <- 1
 pb <- txtProgressBar(min=1, max=length(allFiles), style=3)
 fig5Data <- list()
@@ -22,10 +28,11 @@ for (file in allFiles)
     load(file)
    
     fig5Data[[file]] <- list(
-        'density'    = sapply(0:output@runTime, getDensity, model=output),
+        'numCells'    = sapply(0:output@runTime, getNumberOfCells, model=output),
         'numTypes'    = length(output@cellTypes),
 	'typeName'    = output@cellTypes[[1]]@name,
-        'typeFreq' = output@cellTypeInitFreq
+        'typeFreq' = output@cellTypeInitFreq,
+	'typeAProp' = getTypeAProportion(output@runTime, output)
     )
     
     fileNo <- fileNo + 1

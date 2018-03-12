@@ -28,87 +28,39 @@ delta <- 0.2
 
 #### Set Custom Values ####
 
-#Main source of variation is initial proportion
-#Three parameters: initial proportion, number of cell types, difference in cell types
-#A – show variance with one type is small
-#B – show variance is large with two cell types and varying prop
-#C – show adding cell types does not increase this variance
-#D – show increasing variance with increase variance in prop
-#Each fig has 3 components: total over time, prop dist, total dist at 48 hours
-
-#singleType <- new('CellType', name='DEFAULT', minCycle=24-20,
-#    cycleLength=function() max(24-20, rnorm(1,24,10)))
-
 typeA <- new('CellType', name='A', minCycle=8,
     cycleLength=function() max(8, rnorm(1,12,1)))
 
 typeB <- new('CellType', name='B', minCycle=32,
     cycleLength=function() max(32, rnorm(1,36,1)))
 
-#type3 <- new('CellType', name='C', minCycle=20-2,
-#    cycleLength=function() max(20-2, rnorm(1,20,1)))
 
-#type4 <- new('CellType', name='D', minCycle=28-2,
-#    cycleLength=function() max(28-2, rnorm(1,28,1)))
+nReplicates <- 40 # number of runs per variance
+nVars <- 10 # number of x-axis variances
 
-#type5 <- new('CellType', name='E', minCycle=32-2,
-#    cycleLength=function() max(32-2, rnorm(1,32,1)))
+allSingleCellTypes <- lapply(1:nVars, function(v) new('CellType', name=paste('DEFAULT_', v, sep=""),
+	minCycle=12, cycleLength=function() max(12, rnorm(1,24,round(v/3,2)))))
 
-#type6 <- new('CellType', name='E', minCycle=36-2,
-#    cycleLength=function() max(36-2, rnorm(1,36,1)))
-
-#numReplicates <- 200
-#totalRuns <- 4 * numReplicates
-
-#if (arrayNum <= numReplicates)
-#{
-#    cellTypes <- c(singleType)
-#    cellTypeInitFreq <- c(1)
-
-#} else if (arrayNum <= totalRuns) {
-
-#    cellTypes <- c(type1, type6)
-#    aProp <- runif(1,0,1)
-#    cellTypeInitFreq <- c(aProp, 1 - aProp)
-#}
-
-#} else if (arrayNum <= 5 * numReplicates) {
-#
-#    cellTypes <- c(type1, type2, type5, type6)
-#    cellTypeInitFreq <- c(rmultinom(1, 100, rep(1/4, 4))) / 100
-#
-#} else {
-#
-#    cellTypes <- c(type1, type2, type3, type4, type5, type6)
-#    cellTypeInitFreq <- c(rmultinom(1, 100, rep(1/6, 6))) / 100
-#
-#}
-
-# 10 x-axis variances
-# 30 runs per variance
-# 2 types of runs (one/two type)
-
-allSingleCellTypes <- lapply(1:10, function(v) new('CellType', name=paste('DEFAULT_', v, sep=""),
-	minCycle=12, cycleLength=function() max(12, rnorm(1,24,v))))
-
-if (arrayNum <= 10 * 30) { # one type
+if (arrayNum <= nVars * nReplicates) { # one type
 	
-	cellTypes <- c(allSingleCellTypes[floor((arrayNum - 1) / 30) + 1])
+	cellTypes <- c(allSingleCellTypes[floor((arrayNum - 1) / nReplicates) + 1])
 
 } else { # two types
 
-	range <- ((floor(arrayNum - 1) / 30) + 1) * 0.05
+	range <- (floor((arrayNum - (nVars * nReplicates + 1)) / nReplicates) + 1) * 0.05
 	aProp <- runif(1,0.5-range,0.5+range)
 	cellTypeInitFreq <- c(aProp, 1 - aProp)
 	cellTypes <- c(typeA, typeB)
 }
 
+boundary <- 0
+randSeed <- arrayNum
 
 #### Run Simulation ####
 
 if (!is.na(returnSize)) {
 
-    cat(as.numeric(600))
+    cat(as.numeric(2 * nVars * nReplicates))
 
 } else {
 
