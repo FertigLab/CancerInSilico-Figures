@@ -1,8 +1,8 @@
 #!/bin/bash -l
 
 #SBATCH
-#SBATCH --job-name=cleanData
 #SBATCH --time=3:0:0
+#SBATCH --job-name=fig5_clean
 #SBATCH --partition=shared
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
@@ -10,4 +10,11 @@
 #SBATCH --mail-type=end
 #SBATCH --mail-user=tsherma4@jhu.edu
 
-time Rscript cleanData.R
+if [ "$1" != "" ]; then
+    DIR=$1
+else
+    echo "no input directory"
+    exit 1
+fi
+
+Rscript cleanData.R $DIR
