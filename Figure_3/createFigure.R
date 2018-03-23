@@ -24,7 +24,7 @@ realData$Fit <- rep(0, nrow(realData))
 
 # time points of real data translated to indices in simulated data
 simNdx <- seq(0,144,24) + 1
-fitNdx <- seq(24,144,24) + 1
+fitNdx <- seq(48,168,24) + 1
 
 # fit pbs data
 noDrugSims <- fig3Data[sapply(fig3Data, function(d) d$drugEffect==1)]
@@ -33,6 +33,7 @@ pbsFit <- noDrugSims[[which(l2==min(l2))]]
 realData[1:7,]$Fit <- pbsFit$numCells[simNdx] * realData[2,]$numCells /
     pbsFit$numCells[simNdx][2]
 
+print(c(pbsFit$cycleLength, pbsFit$initDensity))
 tangFit <- list("pbs"=pbsFit)
 
 # fit ctx data
@@ -94,6 +95,7 @@ for (i in c(1,7,13)) # day 0 index of each cell line for PBS
 
     # store fitted simulations
     line <- c("1", "6", "25")[(round(i/7) + 1)]
+    print(c(pbsFit$cycleLength, pbsFit$initDensity))
     kagoharaFit[[paste("pbs_scc", line, sep="")]] <- pbsFit
     kagoharaFit[[paste("ctx_scc", line, sep="")]] <- drugFit
 }

@@ -30,9 +30,9 @@ for (file in allFiles)
     fig5Data[[file]] <- list(
         'numCells'    = sapply(0:output@runTime, getNumberOfCells, model=output),
         'numTypes'    = length(output@cellTypes),
-	'typeName'    = output@cellTypes[[1]]@name,
-        'typeFreq' = output@cellTypeInitFreq,
-	'typeAProp' = getTypeAProportion(output@runTime, output)
+        'typeName'    = output@cellTypes[[1]]@name,
+        'typeFreq'    = output@cellTypeInitFreq,
+        'typeAProp'   = getTypeAProportion(output@runTime, output)
     )
     
     fileNo <- fileNo + 1

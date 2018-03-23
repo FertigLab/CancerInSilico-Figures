@@ -4,11 +4,11 @@ set.seed(123)
 
 # simulate data
 
-typeA <- new('CellType', name='A', minCycle=24-4,
-    cycleLength=function() max(24-4, rnorm(1,24,1)))
+typeA <- new('CellType', name='A', minCycle=20,
+    cycleLength=function() 20 + rexp(1,1/4))
 
-typeB <- new('CellType', name='B', minCycle=36-4,
-    cycleLength=function() max(36-4, rnorm(1,36,1)))
+typeB <- new('CellType', name='B', minCycle=32,
+    cycleLength=function() 32 + rexp(1,1/4))
 
 twoTypesModel <- inSilicoCellModel(initialNum=100, runTime=168, density=0.05,
     boundary=1, syncCycle=FALSE, randSeed=123, outputIncrement=4,
@@ -21,7 +21,7 @@ twoTypesModel <- inSilicoCellModel(initialNum=100, runTime=168, density=0.05,
 params <- new('GeneExpressionParams')
 params@RNAseq <- TRUE
 params@singleCell <- TRUE
-params@nCells <- 96
+params@nCells <- 100
 params@sampleFreq <- 4
 params@splatParams <- splatter::setParam(params@splatParams, "dropout.present", TRUE)
 
