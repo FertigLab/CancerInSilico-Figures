@@ -1,8 +1,10 @@
 library(CancerInSilico)
 
+args <- commandArgs(TRUE)
+dir <- args[1]
+
 ## read data, extract neccesary info
-allFiles <- list.files(path='~/data/figure_data/Figure_5', full.names = TRUE,
-    recursive = TRUE, pattern = "*.RData")
+allFiles <- list.files(path=dir, full.names = TRUE, recursive = TRUE, pattern = "*.RData")
 
 getMean <- function(cellType)
 {

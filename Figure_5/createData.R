@@ -28,17 +28,16 @@ delta <- 0.2
 #### Set Custom Values ####
 
 typeA <- new('CellType', name='A', minCycle=8,
-    cycleLength=function() max(8, rnorm(1,12,1)))
+    cycleLength=function() 8 + rexp(1,1/4))
 
 typeB <- new('CellType', name='B', minCycle=32,
-    cycleLength=function() max(32, rnorm(1,36,1)))
-
+    cycleLength=function() 32 + rexp(1,1/4))
 
 nReplicates <- 40 # number of runs per variance
 nVars <- 10 # number of x-axis variances
 
 allSingleCellTypes <- lapply(1:nVars, function(v) new('CellType', name=paste('DEFAULT_', v, sep=""),
-	minCycle=12, cycleLength=function() max(12, rnorm(1,24,round(v/3,2)))))
+	minCycle=24 - v, cycleLength=function() 24 - v + rexp(1,1/v)))
 
 if (arrayNum <= nVars * nReplicates) { # one type
 	
