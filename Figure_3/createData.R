@@ -32,8 +32,8 @@ allDensities <- seq(0.001, 0.05, length=10)
 allCellTypes <- lapply(seq(30,60,6), function(l) new('CellType',
     name='DEFAULT', minCycle=l, cycleLength=function() l))
 allDrugs <- lapply(seq(1.0, 2.0, 0.05), function(l) new('Drug',
-    name='DEFAULT', timeAdded=24, cycleLengthEffect=function(a,b)
-    rnorm(n=1, mean=b*l, sd=4)))
+    name='DEFAULT', timeAdded=0, cycleLengthEffect=function(a,b)
+    b*l - 4 + rexp(1, 1/4)))
 
 dim <- c(length(allDensities), length(allCellTypes), length(allDrugs))
 indexArray <- array(1:prod(dim), dim)
