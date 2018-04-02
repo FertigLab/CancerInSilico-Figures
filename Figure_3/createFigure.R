@@ -3,17 +3,11 @@ load('Figure_3_cleaned.RData') #fig3Data
 load('tangData.RData') #tangData
 load('KagoharaGrowthData.RData')
 
-# useful functions
-l2norm <- function(a,b)
+# useful function
+l2Norm <- function(sim, real)
 {
-    sqrt(sum((a-b)^2))
-}
-
-computeL2 <- function(sim, real, ndx)
-{
-    nCells <- sim$numCells[ndx]
-    nCells <- nCells * real[1] / nCells[1]
-    l2norm(nCells, real)
+    sim <- sim * real[1] / sim[1]
+    sqrt(sum((sim-real)^2))
 }
 
 #### Tang Data (3a)
@@ -22,16 +16,20 @@ computeL2 <- function(sim, real, ndx)
 realData <- subset(tangData, dosage %in% c(0, 10, 100))
 realData$Fit <- rep(0, nrow(realData))
 
-# time points of real data translated to indices in simulated data
-simNdx <- seq(0,144,24) + 1
-fitNdx <- seq(48,168,24) + 1
-
 # fit pbs data
+simNdx <- 24 + seq(0,120,24) + 1 # offset 24 for smoother gene expression
 noDrugSims <- fig3Data[sapply(fig3Data, function(d) d$drugEffect==1)]
-l2 <- sapply(noDrugSims, computeL2, real=realData[2:7,]$numCells, ndx=fitNdx)
+l2 <- sapply(noDrugSims, function(sim)
+{
+    simCells <- sim$numCells[simNdx] 
+    realCells <- realData[2:7,]$numCells
+    return(l2Norm(simCells, realCells))
+})
 pbsFit <- noDrugSims[[which(l2==min(l2))]]
-realData[1:7,]$Fit <- pbsFit$numCells[simNdx] * realData[2,]$numCells /
-    pbsFit$numCells[simNdx][2]
+
+# scale fit data to match initial time point of real data
+realData[2:7,]$Fit <- pbsFit$numCells[simNdx] * realData[2,]$numCells /
+    pbsFit$numCells[simNdx][1]
 
 print(c(pbsFit$cycleLength, pbsFit$initDensity))
 tangFit <- list("pbs"=pbsFit)
@@ -42,10 +40,15 @@ drugSims <- fig3Data[sapply(fig3Data, function(d)
 for (i in c(8,15)) # day 1 index for ctx
 {
     ndx <- (i+1):(i+6)
-    l2 <- sapply(drugSims, computeL2, real=realData[ndx,]$numCells, ndx=fitNdx)
+    l2 <- sapply(drugSims, function(sim)
+    {
+        simCells <- sim$numCells[simNdx] 
+        realCells <- realData[ndx,]$numCells
+        return(l2Norm(simCells, realCells))
+    })
     drugFit <- drugSims[[which(l2==min(l2))]]
-    realData[i:(i+6),]$Fit <- drugFit$numCells[simNdx] * realData[i+1,]$numCells /
-        drugFit$numCells[simNdx][2]
+    realData[(i+1):(i+6),]$Fit <- drugFit$numCells[simNdx] * realData[i+1,]$numCells /
+        drugFit$numCells[simNdx][1]
 
     # store fitted simulations
     dose <- c("10ug", "100ug")[round(i/8)]
@@ -53,10 +56,11 @@ for (i in c(8,15)) # day 1 index for ctx
 }
 
 # plot both fits
+print(realData)
 realData$dosage <- factor(realData$dosage, labels=c("PBS", "10ug", "100ug"))
 fig <- ggplot(realData) +
     geom_point(aes(x=day, y=numCells, shape=factor(dosage), color=factor(dosage))) + 
-    geom_line(aes(x=day, y=Fit, linetype=factor(dosage), color=factor(dosage))) +
+    geom_line(data=subset(realData, day != 1), aes(x=day, y=Fit, linetype=factor(dosage), color=factor(dosage))) +
     scale_linetype_manual(values=c("solid", "dashed", "dotdash")) +
     labs(title="Tang Data", linetype="Dosage", shape="Dosage", color="Dosage",
         caption="Figure 3a", x="Day", y="Number Of Cells")
@@ -67,10 +71,10 @@ ggsave(filename="fig3a.pdf", plot=fig)
 # get real data
 realData <- subset(kagoharaData, Experiment==1)[,c(1,2,3,4,10)]
 realData$Fit <- rep(0, nrow(realData))
+print(realData)
 
-# time points of real data translated to indices in simulated data
-simNdx <- seq(0,120,24) + 1
-
+# loop through cell lines, fit each one
+simNdx <- 24 + seq(0,120,24) + 1 # offset 24 for smoother gene expression
 kagoharaFit <- list()
 noDrugSims <- fig3Data[sapply(fig3Data, function(d) d$drugEffect==1)]
 for (i in c(1,7,13)) # day 0 index of each cell line for PBS
@@ -80,7 +84,12 @@ for (i in c(1,7,13)) # day 0 index of each cell line for PBS
     ctxNdx <- 18 + pbsNdx
 
     # fit pbs data
-    l2 <- sapply(noDrugSims, computeL2, real=realData[pbsNdx,]$Mean, ndx=simNdx)
+    l2 <- sapply(noDrugSims, function(sim)
+    {
+        simCells <- sim$numCells[simNdx] 
+        realCells <- realData[pbsNdx,]$Mean
+        return(l2Norm(simCells, realCells))
+    })
     pbsFit <- noDrugSims[[which(l2==min(l2))]]
     realData[pbsNdx,]$Fit <- pbsFit$numCells[simNdx] * realData[i,]$Mean /
         pbsFit$numCells[simNdx][1]
@@ -88,7 +97,12 @@ for (i in c(1,7,13)) # day 0 index of each cell line for PBS
     # fit ctx data
     drugSims <- fig3Data[sapply(fig3Data, function(d)
         d$initDensity==pbsFit$initDensity & d$cycleLength==pbsFit$cycleLength)]
-    l2 <- sapply(drugSims, computeL2, real=realData[ctxNdx,]$Mean, ndx=simNdx)
+    l2 <- sapply(drugSims, function(sim)
+    {
+        simCells <- sim$numCells[simNdx] 
+        realCells <- realData[ctxNdx,]$Mean
+        return(l2Norm(simCells, realCells))
+    })
     drugFit <- drugSims[[which(l2==min(l2))]]
     realData[ctxNdx,]$Fit <- drugFit$numCells[simNdx] * realData[i,]$Mean /
         drugFit$numCells[simNdx][1]
@@ -101,6 +115,7 @@ for (i in c(1,7,13)) # day 0 index of each cell line for PBS
 }
 
 # plot pbs fit
+print(realData)
 fig <- ggplot(subset(realData, Treatment=='PBS')) +
     geom_point(aes(x=Day, y=Mean, shape=CellLine, color=CellLine)) + 
     geom_line(aes(x=Day, y=Fit, group=CellLine, color=CellLine)) +
