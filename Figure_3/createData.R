@@ -29,7 +29,7 @@ delta <- 0.2
 #### Set Custom Values ####
 
 allDensities <- seq(0.001, 0.05, length=10)
-allCellTypes <- lapply(seq(30,60,6), function(l) new('CellType',
+allCellTypes <- lapply(seq(20,34,2), function(l) new('CellType',
     name='DEFAULT', minCycle=l, cycleLength=function() l))
 allDrugs <- lapply(seq(1.0, 2.0, 0.05), function(l) new('Drug',
     name='DEFAULT', timeAdded=0, cycleLengthEffect=function(a,b)
