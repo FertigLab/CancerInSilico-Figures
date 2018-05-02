@@ -19,8 +19,8 @@ runModel <- function(cycleLength, density, boundary)
     output <- inSilicoCellModel(initialNum=100, runTime=168, density=density,
         boundary=boundary, syncCycle=FALSE, randSeed=123, outputIncrement=4,
         recordIncrement=0.25, timeIncrement=0.001, cellTypes=c(type),
-        cellTypeInitFreq=c(1), maxDeformation=0.1, maxTranslation=0.1,
-        maxRotation=0.3, nG=28, epsilon=10, delta=0.2)
+        cellTypeInitFreq=c(1), maxTranslation=0.1, maxRotation=0.3,
+        nG=28, epsilon=10, delta=0.2)
 
     time <- 0:output@runTime
     N <- length(time)

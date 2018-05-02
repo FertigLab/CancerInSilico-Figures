@@ -41,6 +41,7 @@ simExpression <- function(model, refData, overlap='none', RNAseq=FALSE)
     params@nCells <- 100
     params@sampleFreq <- 24
     params@perError <- 0.1
+    params@randSeed <- 54
 
     M_genes <- switch(overlap, none=M_none, half=M_half, full=M_full)
     S_genes <- switch(overlap, none=S_none, half=S_half, full=S_full)

@@ -13,22 +13,24 @@ allGenes <- c(pwyGrowth@genes, pwyMitosis@genes, pwySPhase@genes,
 
 # helper functions
 
-internalHeatmap <- function(filename, title, data, times, rowColors, colColors)
+internalHeatmap <- function(filename, title, data, times, rowColors, colColors, dirs)
 {
-    pdf(filename, width=13, height=10)
+    for (d in dirs)
+    {
+        pdf(paste(d, filename, sep="/"), width=13, height=10)
+        ndx <- apply(data, 1, var) == 0 # remove zero variance rows
 
-    ndx <- apply(data, 1, var) == 0 # remove zero variance rows
-
-    heatmap.2(data[!ndx,], 
-        col=greenred, scale='row',
-        trace='none', hclust=function(x) hclust(x,method='complete'),
-        distfun=function(x) as.dist((1-cor(t(x)))/2), 
-        Colv=FALSE, dendrogram='row',
-        ColSideColors = colColors,
-        RowSideColors = rowColors[!ndx],
-        labCol = times,
-        main=title)
-    dev.off()
+        heatmap.2(data[!ndx,], 
+            col=greenred, scale='row',
+            trace='none', hclust=function(x) hclust(x,method='complete'),
+            distfun=function(x) as.dist((1-cor(t(x)))/2), 
+            Colv=FALSE, dendrogram='row',
+            ColSideColors = colColors,
+            RowSideColors = rowColors[!ndx],
+            labCol = times,
+            main=title)
+        dev.off()
+    }
 }
 
 getGeneNames <- function(pathway, overlap)
@@ -41,7 +43,7 @@ getGeneNames <- function(pathway, overlap)
     switch(pathway, growth=g, mitosis=m, sphase=s, contact_inhibition=ci)
 }
 
-plotTangHeatmap <- function(data, simulated, pathway, overlap, cycle)
+plotTangHeatmap <- function(data, simulated, pathway, overlap, cycle, dirs)
 {
     print(paste(simulated, pathway, overlap, cycle))
     filename <- paste("tang_", simulated, "_", pathway, "_", overlap, "_",
@@ -55,10 +57,10 @@ plotTangHeatmap <- function(data, simulated, pathway, overlap, cycle)
     times <- rep(seq(0,144,24),2)
     drugColors <- rep(c("black","red"), each=7)
 
-    internalHeatmap(filename, plotTitle, data, times, geneColors, drugColors)
+    internalHeatmap(filename, plotTitle, data, times, geneColors, drugColors, dirs)
 }
 
-plotKagoharaHeatmap <- function(data, simulated, pathway, overlap, cellLine, cycle)
+plotKagoharaHeatmap <- function(data, simulated, pathway, overlap, cellLine, cycle, dirs)
 {
     print(paste(simulated, pathway, overlap, cellLine, cycle))
     filename <- paste("kagohara_", cellLine, "_", simulated, "_", pathway, "_",
@@ -80,10 +82,10 @@ plotKagoharaHeatmap <- function(data, simulated, pathway, overlap, cellLine, cyc
         times <- c(seq(0,120,24), seq(24,120,24))
         drugColors <- c(rep('black',6), rep('red',5))
     }
-    internalHeatmap(filename, plotTitle, data, times, geneColors, drugColors)
+    internalHeatmap(filename, plotTitle, data, times, geneColors, drugColors, dirs)
 }
 
-plotTangPathways <- function(simulated, overlap="none", cycle="fix")
+plotTangPathways <- function(simulated, dirs, overlap="none", cycle="fix")
 {
     if (simulated == 'simulated')
     {
@@ -105,13 +107,13 @@ plotTangPathways <- function(simulated, overlap="none", cycle="fix")
         mat <- mat[rownames(mat) %in% allGenes,]
     }
     print(colnames(mat))
-    plotTangHeatmap(mat, simulated, 'growth', overlap, cycle)
-    plotTangHeatmap(mat, simulated, 'mitosis', overlap, cycle)
-    plotTangHeatmap(mat, simulated, 'sphase', overlap, cycle)
-    plotTangHeatmap(mat, simulated, 'contact_inhibition', overlap, cycle)
+    plotTangHeatmap(mat, simulated, 'growth', overlap, cycle, dirs)
+    plotTangHeatmap(mat, simulated, 'mitosis', overlap, cycle, dirs)
+    plotTangHeatmap(mat, simulated, 'sphase', overlap, cycle, dirs)
+    plotTangHeatmap(mat, simulated, 'contact_inhibition', overlap, cycle, dirs)
 }
 
-plotKagoharaPathways <- function(simulated, cellLine, overlap="none", cycle="fix")
+plotKagoharaPathways <- function(simulated, cellLine, dirs, overlap="none", cycle="fix")
 {
     if (simulated == 'simulated')
     {
@@ -138,37 +140,39 @@ plotKagoharaPathways <- function(simulated, cellLine, overlap="none", cycle="fix
         mat <- mat[rownames(mat) %in% allGenes,]
     }
     print(colnames(mat))
-    plotKagoharaHeatmap(mat, simulated, 'growth', overlap, cellLine, cycle)
-    plotKagoharaHeatmap(mat, simulated, 'mitosis', overlap, cellLine, cycle)
-    plotKagoharaHeatmap(mat, simulated, 'sphase', overlap, cellLine, cycle)
-    plotKagoharaHeatmap(mat, simulated, 'contact_inhibition', overlap, cellLine, cycle)
-}
-
-plotKagoharaCellLine <- function(cellLine)
-{
-    plotKagoharaPathways("simulated", cellLine, "none", "fix")
-    plotKagoharaPathways("simulated", cellLine, "none", "var")
-    plotKagoharaPathways("simulated", cellLine, "half", "fix")
-    plotKagoharaPathways("simulated", cellLine, "half", "var")
-    plotKagoharaPathways("simulated", cellLine, "full", "fix")
-    plotKagoharaPathways("simulated", cellLine, "full", "var")
-    plotKagoharaPathways("real", cellLine)
+    plotKagoharaHeatmap(mat, simulated, 'growth', overlap, cellLine, cycle, dirs)
+    plotKagoharaHeatmap(mat, simulated, 'mitosis', overlap, cellLine, cycle, dirs)
+    plotKagoharaHeatmap(mat, simulated, 'sphase', overlap, cellLine, cycle, dirs)
+    plotKagoharaHeatmap(mat, simulated, 'contact_inhibition', overlap, cellLine, cycle, dirs)
 }
 
 # create heatmaps
 
-plotKagoharaCellLine("all")
-plotKagoharaCellLine("scc1")
-plotKagoharaCellLine("scc6")
-plotKagoharaCellLine("scc25")
+# supp3 additional cell line fits
+# supp4 effect of pathway overlap
+# supp5 effect of cycle variance
 
-plotTangPathways("simulated", "none", "fix")
-plotTangPathways("simulated", "none", "var")
-plotTangPathways("simulated", "half", "fix")
-plotTangPathways("simulated", "half", "var")
-plotTangPathways("simulated", "full", "fix")
-plotTangPathways("simulated", "full", "var")
-plotTangPathways("real")
+plotKagoharaPathways("real", "scc1", c("fig4c", "supp3a"))
+plotKagoharaPathways("simulated", "scc1", c("supp4d", "supp5a"), "none", "fix")
+plotKagoharaPathways("simulated", "scc1", c("supp5b"), "none", "var")
+plotKagoharaPathways("simulated", "scc1", c("supp4e"), "half", "fix")
+plotKagoharaPathways("simulated", "scc1", c("supp4f"), "full", "fix")
+plotKagoharaPathways("simulated", "scc1", c("fig4d", "supp3b"), "full", "var")
+
+plotKagoharaPathways("real", "scc6", c("supp3c"))
+plotKagoharaPathways("simulated", "scc6", c("supp5c"), "none", "fix")
+plotKagoharaPathways("simulated", "scc6", c("supp5d"), "none", "var")
+plotKagoharaPathways("simulated", "scc6", c("supp3d"), "full", "var")
+
+plotKagoharaPathways("real", "scc25", c("supp3e"))
+plotKagoharaPathways("simulated", "scc25", c("supp5e"), "none", "fix")
+plotKagoharaPathways("simulated", "scc25", c("supp5f"), "none", "var")
+plotKagoharaPathways("simulated", "scc25", c("supp3f"), "full", "var")
+
+plotTangPathways("real", c("fig4a"))
+plotTangPathways("simulated", c("supp4a"), "none", "fix")
+plotTangPathways("simulated", c("supp4b"), "half", "fix")
+plotTangPathways("simulated", c("fig4b", "supp4c"), "full", "fix")
 
 ## plot pathway activity
 
