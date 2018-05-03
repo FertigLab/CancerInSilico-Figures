@@ -14,8 +14,8 @@ typeB <- new('CellType', name='B', minCycle=32,
 twoTypesModel <- inSilicoCellModel(initialNum=100, runTime=168, density=0.05,
     boundary=1, syncCycle=FALSE, randSeed=123, outputIncrement=4,
     recordIncrement=0.25, timeIncrement=0.001, cellTypes=c(typeA, typeB),
-    cellTypeInitFreq=c(0.5,0.5), maxDeformation=0.1,
-    maxTranslation=0.1, maxRotation=0.3, nG=28, epsilon=10, delta=0.2)
+    cellTypeInitFreq=c(0.5,0.5), maxTranslation=0.1, maxRotation=0.3,
+    nG=28, epsilon=10, delta=0.2)
 
 # generate gene expression data
 

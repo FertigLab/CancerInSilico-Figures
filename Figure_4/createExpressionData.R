@@ -1,6 +1,5 @@
 # load libraries
 library(CancerInSilico)
-data(SamplePathways)
 library(foreach)
 library(doParallel)
 
@@ -17,6 +16,7 @@ load("../../DataFromTang/TangExpressionData.Rda")
 set.seed(123)
 
 # create pathways for various overlap
+data(SamplePathways)
 M_none <- pwyMitosis@genes
 S_none <- pwySPhase@genes
 G_none <- pwyGrowth@genes
@@ -67,6 +67,7 @@ registerDoParallel(cl)
 STC_transformed <- floor(2^STC.D)
 ge <- foreach(i = 1:48, .packages="CancerInSilico") %dopar%
 {
+    data(SamplePathways)
     if (i <= 4)
     {
         simExpression(cellModels[[i]], tangExpressionData, "none")

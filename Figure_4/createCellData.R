@@ -32,8 +32,8 @@ runModel <- function(sim, time, addVariance)
     inSilicoCellModel(initialNum=60, runTime=time, density=sim$initDensity,
         boundary=1, syncCycle=FALSE, randSeed=0, outputIncrement=4,
         recordIncrement=0.25, timeIncrement=0.001, cellTypes=cellTypes,
-        cellTypeInitFreq=c(1), drugs=drugs, maxDeformation=0.1,
-        maxTranslation=0.1, maxRotation=0.3, nG=28, epsilon=10, delta=0.2)
+        cellTypeInitFreq=c(1), drugs=drugs, maxTranslation=0.1,
+        maxRotation=0.3, nG=28, epsilon=10, delta=0.2)
 }
 
 # call runModel in parallel
