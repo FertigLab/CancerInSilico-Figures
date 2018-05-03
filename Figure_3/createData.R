@@ -63,7 +63,6 @@ if (!is.na(returnSize)) {
         cellTypes=cellTypes,
         cellTypeInitFreq=cellTypeInitFreq,
         drugs=drugs,
-        maxDeformation=maxDeformation,
         maxTranslation=maxTranslation,
         maxRotation=maxRotation,
         nG=nG,

@@ -1,5 +1,6 @@
 library(CancerInSilico)
 library(ggplot2)
+library(methods)
 set.seed(123)
 
 # simulate data
