@@ -20,8 +20,8 @@ phase[phase == "I"] <- "blue"
 phase[phase == "S"] <- "orange"
 phase[phase == "M"] <- "red"
 
-#tsne_out <- Rtsne(t(ge), dims=3, initial_dims=3, perplexity=30,
-#       theta=0.5, pca=TRUE, max_iter=1000, verbose=TRUE)
+tsne_out <- Rtsne(t(ge), dims=3, initial_dims=3, perplexity=30,
+       theta=0.5, pca=TRUE, max_iter=1000, verbose=TRUE)
 
 myColorRamp <- function(values, palette=viridis(255))
 {
@@ -34,10 +34,8 @@ myColorRamp <- function(values, palette=viridis(255))
     rgb(x[,1], x[,2], x[,3], maxColorValue=255)
 }
 
-load("temp.RData")
-
 open3d()
-par3d(windowRect=c(0,0,1200,1200))
+par3d(windowRect=c(200,200,1400,1400))
 
 plot3d(tsne_out$Y, col=type, xlab="", ylab="", zlab="")
 legend3d("topright", legend=c("Type A", "Type B"), pch=16, cex=1,
@@ -51,7 +49,7 @@ rgl.postscript("fig6_tsne_coloredbyPHASE.pdf", fmt="pdf", drawText=TRUE)
 
 plot3d(tsne_out$Y, col=myColorRamp(times), xlab="", ylab="", zlab="")
 legend3d("topright", legend=c("0 hours", "168 hours"), pch=16, cex=1,
-    col=c(myColorRamp(min(times)), myColorRamp(max(times))), inset=c(0.02))
+    col=c(min(myColorRamp(times)), max(myColorRamp(times))), inset=c(0.02))
 rgl.postscript("fig6_tsne_coloredbyTIME.pdf", fmt="pdf")
 
 #M <- par3d("userMatrix")

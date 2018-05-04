@@ -24,9 +24,11 @@ params@RNAseq <- TRUE
 params@singleCell <- TRUE
 params@nCells <- 100
 params@sampleFreq <- 4
-params@splatParams <- splatter::setParam(params@splatParams, "dropout.present", TRUE)
+params@randSeed <- 123
+params@dropoutPresent <- TRUE
 
 data(SamplePathways)
+data(ReferenceGeneExpression)
 refCountData <- round(2 ^ referenceGeneExpression - 1)
 
 pwyCellTypeA <- new('Pathway', genes = pwyGrowth@genes[1:241],

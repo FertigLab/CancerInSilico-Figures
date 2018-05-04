@@ -14,17 +14,27 @@ getDrugEffect <- function(d)
     return(corrected / 1000)
 }
 
+getCellArea <- function(model, time)
+{
+    N <- getNumberOfCells(model, time)
+    radius <- sapply(1:N, getRadius, model=model, time=time)
+    axis_length <- sapply(1:N, getAxisLength, model=model, time=time)
+    interphase <- axis_length <= 2 * radius
+    N_mitosis <- length(!interphase)
+    return(sum(pi * radius[interphase]^2) + 2 * pi * N_mitosis)
+}
+
 fileNo <- 1
 pb <- txtProgressBar(min=1, max=length(allFiles), style=3)
 fig3Data <- list()
 for (file in allFiles)
 {
     load(file)
-    nCells <- sapply(0:output@runTime, getNumberOfCells, model=output)
+    cellArea <- sapply(0:output@runTime, getCellArea, model=output)
 
     fig3Data[[file]] <- list(
         'initDensity' = output@density,
-        'numCells'    = nCells,
+        'cellArea'    = cellArea,
         'drugEffect'  = getDrugEffect(output@drugs[[1]]),
         'cycleLength' = output@cellTypes[[1]]@minCycle)
 

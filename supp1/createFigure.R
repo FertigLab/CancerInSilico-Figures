@@ -19,7 +19,7 @@ y_sync <- data_1b[[2]]
 y_unsync <- data_1b[[3]]
 yall <- c(y_sync, y_unsync)
 plot(NULL, xlim=c(min(x), max(x)), ylim=c(min(yall), max(yall)),
-    main="supplement 1b", xlab="hours", ylab="num cells")
+    main="supplement 1b", xlab="hours", ylab="number of cells")
 lines(x, y_sync)
 lines(x, y_unsync, col="red")
 dev.off()
