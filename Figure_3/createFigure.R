@@ -15,21 +15,22 @@ l2Norm <- function(sim, real)
 # get real data
 realData <- subset(tangData, dosage %in% c(0, 10, 100))
 realData$Fit <- rep(0, nrow(realData))
+colnames(realData)[colnames(realData) == "numCells"] <- "cellArea"
 
 # fit pbs data
 simNdx <- 24 + seq(0,120,24) + 1 # offset 24 for smoother gene expression
 noDrugSims <- fig3Data[sapply(fig3Data, function(d) d$drugEffect==1)]
 l2 <- sapply(noDrugSims, function(sim)
 {
-    simCells <- sim$numCells[simNdx] 
-    realCells <- realData[2:7,]$numCells
-    return(l2Norm(simCells, realCells))
+    simArea <- sim$cellArea[simNdx] 
+    realArea <- realData[2:7,]$cellArea
+    return(l2Norm(simArea, realArea))
 })
 pbsFit <- noDrugSims[[which(l2==min(l2))]]
 
 # scale fit data to match initial time point of real data
-realData[2:7,]$Fit <- pbsFit$numCells[simNdx] * realData[2,]$numCells /
-    pbsFit$numCells[simNdx][1]
+realData[2:7,]$Fit <- pbsFit$cellArea[simNdx] * realData[2,]$cellArea /
+    pbsFit$cellArea[simNdx][1]
 
 print(c(pbsFit$cycleLength, pbsFit$initDensity))
 tangFit <- list("pbs"=pbsFit)
@@ -42,13 +43,13 @@ for (i in c(8,15)) # day 1 index for ctx
     ndx <- (i+1):(i+6)
     l2 <- sapply(drugSims, function(sim)
     {
-        simCells <- sim$numCells[simNdx] 
-        realCells <- realData[ndx,]$numCells
-        return(l2Norm(simCells, realCells))
+        simArea <- sim$cellArea[simNdx] 
+        realArea <- realData[ndx,]$cellArea
+        return(l2Norm(simArea, realArea))
     })
     drugFit <- drugSims[[which(l2==min(l2))]]
-    realData[(i+1):(i+6),]$Fit <- drugFit$numCells[simNdx] * realData[i+1,]$numCells /
-        drugFit$numCells[simNdx][1]
+    realData[(i+1):(i+6),]$Fit <- drugFit$cellArea[simNdx] *
+        realData[i+1,]$cellArea / drugFit$cellArea[simNdx][1]
 
     # store fitted simulations
     dose <- c("10ug", "100ug")[round(i/8)]
@@ -59,11 +60,11 @@ for (i in c(8,15)) # day 1 index for ctx
 print(realData)
 realData$dosage <- factor(realData$dosage, labels=c("PBS", "10ug", "100ug"))
 fig <- ggplot(realData) +
-    geom_point(aes(x=day, y=numCells, shape=factor(dosage), color=factor(dosage))) + 
+    geom_point(aes(x=day, y=cellArea, shape=factor(dosage), color=factor(dosage))) + 
     geom_line(data=subset(realData, day != 1), aes(x=day, y=Fit, linetype=factor(dosage), color=factor(dosage))) +
     scale_linetype_manual(values=c("solid", "dashed", "dotdash")) +
     labs(title="Tang Data", linetype="Dosage", shape="Dosage", color="Dosage",
-        caption="Figure 3a", x="Day", y="Number Of Cells")
+        caption="Figure 3a", x="Day", y="fluorescence")
 ggsave(filename="fig3a.pdf", plot=fig)
 
 #### Kagohara Data (3bc)
@@ -86,26 +87,26 @@ for (i in c(1,7,13)) # day 0 index of each cell line for PBS
     # fit pbs data
     l2 <- sapply(noDrugSims, function(sim)
     {
-        simCells <- sim$numCells[simNdx] 
-        realCells <- realData[pbsNdx,]$Mean
-        return(l2Norm(simCells, realCells))
+        simArea <- sim$cellArea[simNdx] 
+        realArea <- realData[pbsNdx,]$Mean
+        return(l2Norm(simArea, realArea))
     })
     pbsFit <- noDrugSims[[which(l2==min(l2))]]
-    realData[pbsNdx,]$Fit <- pbsFit$numCells[simNdx] * realData[i,]$Mean /
-        pbsFit$numCells[simNdx][1]
+    realData[pbsNdx,]$Fit <- pbsFit$cellArea[simNdx] * realData[i,]$Mean /
+        pbsFit$cellArea[simNdx][1]
     
     # fit ctx data
     drugSims <- fig3Data[sapply(fig3Data, function(d)
         d$initDensity==pbsFit$initDensity & d$cycleLength==pbsFit$cycleLength)]
     l2 <- sapply(drugSims, function(sim)
     {
-        simCells <- sim$numCells[simNdx] 
-        realCells <- realData[ctxNdx,]$Mean
-        return(l2Norm(simCells, realCells))
+        simArea <- sim$cellArea[simNdx] 
+        realArea <- realData[ctxNdx,]$Mean
+        return(l2Norm(simArea, realArea))
     })
     drugFit <- drugSims[[which(l2==min(l2))]]
-    realData[ctxNdx,]$Fit <- drugFit$numCells[simNdx] * realData[i,]$Mean /
-        drugFit$numCells[simNdx][1]
+    realData[ctxNdx,]$Fit <- drugFit$cellArea[simNdx] * realData[i,]$Mean /
+        drugFit$cellArea[simNdx][1]
 
     # store fitted simulations
     line <- c("1", "6", "25")[(round(i/7) + 1)]
@@ -120,7 +121,7 @@ fig <- ggplot(subset(realData, Treatment=='PBS')) +
     geom_point(aes(x=Day, y=Mean, shape=CellLine, color=CellLine)) + 
     geom_line(aes(x=Day, y=Fit, group=CellLine, color=CellLine)) +
     labs(title="Kagohara Data - PBS",
-        caption="Figure 3b", x="Day", y="Number Of Cells")
+        caption="Figure 3b", x="Day", y="fluorescence")
 ggsave(filename="fig3b.pdf", plot=fig)
 
 # plot ctx fit
@@ -128,7 +129,7 @@ fig <- ggplot(subset(realData, Treatment=='CTX')) +
     geom_point(aes(x=Day, y=Mean, shape=CellLine, color=CellLine)) + 
     geom_line(aes(x=Day, y=Fit, group=CellLine, color=CellLine)) +
     labs(title="Kagohara Data - CTX",
-        caption="Figure 3c", x="Day", y="Number Of Cells")
+        caption="Figure 3c", x="Day", y="fluorescence")
 ggsave(filename="fig3c.pdf", plot=fig)
 
 # save fitted simulations
