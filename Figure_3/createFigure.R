@@ -1,136 +1,187 @@
-library(ggplot2)
-load('Figure_3_cleaned.RData') #fig3Data
-load('tangData.RData') #tangData
-load('KagoharaGrowthData.RData')
+############################# load libraries ###################################
 
-# useful function
-l2Norm <- function(sim, real)
+library(CancerInSilico)
+library(Rtsne)
+library(viridis)
+library(rgl)
+set.seed(42)
+
+########################## adjustable parameters ###############################
+
+totalTime <- 168
+initNumCells <- 100
+initDensity <- 0.05
+nGenes <- 100
+
+######################## define multiple cell types ############################
+
+cellTypeA <- new("CellType", name="type.A", size=1, minCycle=20,
+    cycleLength=function() 20 + rexp(1, 1/4))
+
+cellTypeB <- new("CellType", name="type.B", size=1, minCycle=32,
+    cycleLength=function() 32 + rexp(1, 1/4))
+
+allCellTypes <- list(cellTypeA, cellTypeB)
+
+########################### simulate cell growth ###############################
+
+mod <- inSilicoCellModel(initialNum=initNumCells, runTime=totalTime,
+    density=initDensity, outputIncrement=12, cellTypes=allCellTypes,
+    cellTypeInitFreq=c(0.5,0.5), syncCycles=FALSE, randSeed=42)
+
+######################### get cell types by index ##############################
+
+types <- sapply(allCellTypes, function(t) t@name)
+nCells <- getNumberOfCells(mod, totalTime)
+cellType <- c()
+for (c in 1:nCells)
 {
-    sim <- sim * real[1] / sim[1]
-    sqrt(sum((sim-real)^2))
+    cellType[c] <- types[getCellType(mod, totalTime, c)]
 }
 
-#### Tang Data (3a)
-
-# get real data
-realData <- subset(tangData, dosage %in% c(0, 10, 100))
-realData$Fit <- rep(0, nrow(realData))
-colnames(realData)[colnames(realData) == "numCells"] <- "cellArea"
-
-# fit pbs data
-simNdx <- 24 + seq(0,120,24) + 1 # offset 24 for smoother gene expression
-noDrugSims <- fig3Data[sapply(fig3Data, function(d) d$drugEffect==1)]
-l2 <- sapply(noDrugSims, function(sim)
+extractCellIndex <- function(str)
 {
-    simArea <- sim$cellArea[simNdx] 
-    realArea <- realData[2:7,]$cellArea
-    return(l2Norm(simArea, realArea))
-})
-pbsFit <- noDrugSims[[which(l2==min(l2))]]
-
-# scale fit data to match initial time point of real data
-realData[2:7,]$Fit <- pbsFit$cellArea[simNdx] * realData[2,]$cellArea /
-    pbsFit$cellArea[simNdx][1]
-
-print(c(pbsFit$cycleLength, pbsFit$initDensity))
-tangFit <- list("pbs"=pbsFit)
-
-# fit ctx data
-drugSims <- fig3Data[sapply(fig3Data, function(d)
-    d$initDensity==pbsFit$initDensity & d$cycleLength==pbsFit$cycleLength)]
-for (i in c(8,15)) # day 1 index for ctx
-{
-    ndx <- (i+1):(i+6)
-    l2 <- sapply(drugSims, function(sim)
-    {
-        simArea <- sim$cellArea[simNdx] 
-        realArea <- realData[ndx,]$cellArea
-        return(l2Norm(simArea, realArea))
-    })
-    drugFit <- drugSims[[which(l2==min(l2))]]
-    realData[(i+1):(i+6),]$Fit <- drugFit$cellArea[simNdx] *
-        realData[i+1,]$cellArea / drugFit$cellArea[simNdx][1]
-
-    # store fitted simulations
-    dose <- c("10ug", "100ug")[round(i/8)]
-    tangFit[[dose]] <- drugFit
+    as.numeric(substring(strsplit(str, "_")[[1]][1], 2))
 }
 
-# plot both fits
-print(realData)
-realData$dosage <- factor(realData$dosage, labels=c("PBS", "10ug", "100ug"))
-fig <- ggplot(realData) +
-    geom_point(aes(x=day, y=cellArea, shape=factor(dosage), color=factor(dosage))) + 
-    geom_line(data=subset(realData, day != 1), aes(x=day, y=Fit, linetype=factor(dosage), color=factor(dosage))) +
-    scale_linetype_manual(values=c("solid", "dashed", "dotdash")) +
-    labs(title="Tang Data", linetype="Dosage", shape="Dosage", color="Dosage",
-        caption="Figure 3a", x="Day", y="fluorescence")
-ggsave(filename="fig3a.pdf", plot=fig)
-
-#### Kagohara Data (3bc)
-
-# get real data
-realData <- subset(kagoharaData, Experiment==1)[,c(1,2,3,4,10)]
-realData$Fit <- rep(0, nrow(realData))
-print(realData)
-
-# loop through cell lines, fit each one
-simNdx <- 24 + seq(0,120,24) + 1 # offset 24 for smoother gene expression
-kagoharaFit <- list()
-noDrugSims <- fig3Data[sapply(fig3Data, function(d) d$drugEffect==1)]
-for (i in c(1,7,13)) # day 0 index of each cell line for PBS
+extractTimePoint <- function(str)
 {
-    # calculate indices
-    pbsNdx <- i:(i+5)
-    ctxNdx <- 18 + pbsNdx
-
-    # fit pbs data
-    l2 <- sapply(noDrugSims, function(sim)
-    {
-        simArea <- sim$cellArea[simNdx] 
-        realArea <- realData[pbsNdx,]$Mean
-        return(l2Norm(simArea, realArea))
-    })
-    pbsFit <- noDrugSims[[which(l2==min(l2))]]
-    realData[pbsNdx,]$Fit <- pbsFit$cellArea[simNdx] * realData[i,]$Mean /
-        pbsFit$cellArea[simNdx][1]
-    
-    # fit ctx data
-    drugSims <- fig3Data[sapply(fig3Data, function(d)
-        d$initDensity==pbsFit$initDensity & d$cycleLength==pbsFit$cycleLength)]
-    l2 <- sapply(drugSims, function(sim)
-    {
-        simArea <- sim$cellArea[simNdx] 
-        realArea <- realData[ctxNdx,]$Mean
-        return(l2Norm(simArea, realArea))
-    })
-    drugFit <- drugSims[[which(l2==min(l2))]]
-    realData[ctxNdx,]$Fit <- drugFit$cellArea[simNdx] * realData[i,]$Mean /
-        drugFit$cellArea[simNdx][1]
-
-    # store fitted simulations
-    line <- c("1", "6", "25")[(round(i/7) + 1)]
-    print(c(pbsFit$cycleLength, pbsFit$initDensity))
-    kagoharaFit[[paste("pbs_scc", line, sep="")]] <- pbsFit
-    kagoharaFit[[paste("ctx_scc", line, sep="")]] <- drugFit
+    as.numeric(gsub("t", "", strsplit(str, "_")[[1]][2]))
 }
 
-# plot pbs fit
-print(realData)
-fig <- ggplot(subset(realData, Treatment=='PBS')) +
-    geom_point(aes(x=Day, y=Mean, shape=CellLine, color=CellLine)) + 
-    geom_line(aes(x=Day, y=Fit, group=CellLine, color=CellLine)) +
-    labs(title="Kagohara Data - PBS",
-        caption="Figure 3b", x="Day", y="fluorescence")
-ggsave(filename="fig3b.pdf", plot=fig)
+convertNamesToCellTypes <- function(cnames)
+{
+    ndx <- unname(sapply(cnames, extractCellIndex))
+    return(cellType[ndx])
+}
 
-# plot ctx fit
-fig <- ggplot(subset(realData, Treatment=='CTX')) +
-    geom_point(aes(x=Day, y=Mean, shape=CellLine, color=CellLine)) + 
-    geom_line(aes(x=Day, y=Fit, group=CellLine, color=CellLine)) +
-    labs(title="Kagohara Data - CTX",
-        caption="Figure 3c", x="Day", y="fluorescence")
-ggsave(filename="fig3c.pdf", plot=fig)
+convertNamesToTimes <- function(cnames)
+{
+    unname(sapply(cnames, function(x) extractTimePoint(x)))
+}
 
-# save fitted simulations
-save(tangFit, kagoharaFit, file="Fig3_Fitted_Simulations.RData")
+sphaseActivityFunction <- function(model, cell, time)
+{
+    r1 <- getRadius(model, max(time - 1, 0), cell)
+    r2 <- getRadius(model, time, cell)
+    if (is.na(r1))
+        return(0)
+    else
+        return(as.numeric(r1 < sqrt(1.5) & r2 > sqrt(1.5)))
+}
+
+convertNamesToPhases <- function(model, cnames)
+{
+    unname(sapply(cnames, function(str)
+    {
+        ndx <- extractCellIndex(str)
+        time <- extractTimePoint(str)
+        act <- sphaseActivityFunction(model, ndx, time)
+        return(ifelse(act == 1, "S", getCellPhase(model, time, ndx)))
+    }))
+}
+
+############################### define pathways ################################
+
+typeAPwy <- new("Pathway", genes=paste("typeA.", 1:nGenes, sep=""),
+    expressionScale=function(model, cell, time)
+    {
+        as.numeric(getCellType(model, time, cell) == 1)
+    }
+)
+
+typeBPwy <- new("Pathway", genes=paste("typeB.", 1:nGenes, sep=""),
+    expressionScale=function(model, cell, time)
+    {
+        as.numeric(getCellType(model, time, cell) == 2)
+    }
+)
+
+sphasePwy <- new("Pathway", genes=paste("sphase.", 1:nGenes, sep=""),
+    expressionScale=sphaseActivityFunction)
+
+mitosisPwy <- new("Pathway", genes=paste("mitosis.", 1:nGenes, sep=""),
+    expressionScale=function(model, cell, time)
+    {
+        a1 <- getAxisLength(model, max(time - 1, 0), cell)
+        a2 <- getAxisLength(model, time, cell)
+        if (is.na(a1))
+            return(0)
+        else
+            return(as.numeric(a2 < a1))
+    }
+)
+
+contactInhibitionPwy <- new("Pathway", genes=paste("ci.", 1:nGenes, sep=""),
+    expressionScale=function(model, cell, time)
+    {
+        getLocalDensity(model, time, cell, 3.3)
+    }
+)
+
+######################## set gene expression parameters ########################
+
+params <- new("GeneExpressionParams")
+params@randSeed <- 42
+params@nCells <- 100
+params@sampleFreq <- 4
+params@RNAseq <- TRUE
+params@singleCell <- TRUE
+params@dropoutPresent <- TRUE
+params@bcvCommon <- 0.001
+params@combineFUN <- max
+
+calLambda <- 10
+calStdDev <- 2
+
+#################################### figure ####################################
+
+allPwys <- c(typeAPwy, typeBPwy, sphasePwy, mitosisPwy, contactInhibitionPwy)
+allPwys <- calibratePathways(allPwys, lambda=calLambda, stddev=calStdDev)
+res <- inSilicoGeneExpression(mod, allPwys, params)
+
+tsne_out <- Rtsne(t(res$expression), dims=3, initial_dims=3, perplexity=30,
+    theta=0.5, pca=TRUE, max_iter=1000, verbose=TRUE)
+
+# part A, color by cell type
+
+sampledTypes <- convertNamesToCellTypes(colnames(res$expression))
+typeColor <- c("red", "blue")[1 + as.numeric(sampledTypes=="type.A")]
+
+plot3d(tsne_out$Y, col=typeColor, xlab="", ylab="", zlab="")
+legend3d("topright", legend=c("Type A", "Type B"), pch=16, cex=1,
+    col=c("red", "purple"), inset=c(0.04))
+rgl.postscript("fig3A_CELL_TYPE.pdf", fmt="pdf")
+
+# part B, color by time
+
+myColorRamp <- function(values, palette=viridis(255))
+{
+    if (min(values) < 0)
+    {  
+       values <- values + abs(min(values))
+    }
+    v <- (values - min(values)) / diff(range(values))
+    x <- colorRamp(palette)(v)
+    rgb(x[,1], x[,2], x[,3], maxColorValue=255)
+}
+
+sampledTimes <- convertNamesToTimes(colnames(res$expression))
+timeColor <- myColorRamp(sampledTimes)
+
+plot3d(tsne_out$Y, col=timeColor, xlab="", ylab="", zlab="")
+legend3d("topright", legend=c("0 hours", "168 hours"), pch=16, cex=1,
+    col=c(min(timeColor), max(timeColor)), inset=c(0.02))
+rgl.postscript("fig3B_TIME.pdf", fmt="pdf")
+
+# part C, color by phase
+
+sampledPhases <- convertNamesToPhases(mod, colnames(res$expression))
+phaseColor <- rep("blue", length(sampledPhases))
+phaseColor[sampledPhases == "S"] <- "orange"
+phaseColor[sampledPhases == "M"] <- "red"
+
+plot3d(tsne_out$Y, col=phaseColor, xlab="", ylab="", zlab="")
+legend3d("topright", legend=c("Interphase", "SPhase", "Mitosis"), pch=16, cex=1,
+    col=c("blue", "orange", "red"), inset=c(0.02))
+rgl.postscript("fig3C_CELL_PHASE.pdf", fmt="pdf", drawText=TRUE)
